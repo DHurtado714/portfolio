@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export function Hero() {
   return (
@@ -37,18 +38,19 @@ export function Hero() {
       </p>
 
       <div className="mt-10 flex animate-slide-up gap-4 [animation-delay:0.9s]">
-        <Link
-          href="#work"
-          className="inline-flex items-center gap-2 rounded-[10px] bg-green px-7 py-3.5 text-sm font-semibold text-[#050505] transition-all hover:-translate-y-0.5 hover:bg-green-light hover:shadow-[0_8px_24px_rgba(0,200,120,0.2)]"
+        <Button
+          asChild
+          className="h-auto rounded-[10px] bg-green px-7 py-3.5 font-semibold text-[#050505] hover:-translate-y-0.5 hover:bg-green-light hover:shadow-[0_8px_24px_rgba(0,200,120,0.2)]"
         >
-          View my work &darr;
-        </Link>
-        <Link
-          href="#contact"
-          className="inline-flex items-center gap-2 rounded-[10px] border border-border-hover bg-transparent px-7 py-3.5 text-sm font-medium text-text-secondary transition-all hover:-translate-y-0.5 hover:border-text-muted hover:text-foreground"
+          <Link href="#work">View my work &darr;</Link>
+        </Button>
+        <Button
+          asChild
+          variant="ghost"
+          className="h-auto rounded-[10px] border border-border-hover bg-transparent px-7 py-3.5 text-text-secondary hover:-translate-y-0.5 hover:border-text-muted hover:bg-transparent hover:text-foreground dark:hover:bg-transparent"
         >
-          Get in touch
-        </Link>
+          <Link href="#contact">Get in touch</Link>
+        </Button>
       </div>
 
       <div className="absolute bottom-10 left-5 hidden animate-slide-up items-center gap-3 font-mono text-[10px] tracking-[2px] text-text-muted [animation-delay:1.2s] md:flex md:left-12">

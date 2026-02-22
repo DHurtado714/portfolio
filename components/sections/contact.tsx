@@ -1,4 +1,5 @@
 import { contactLinks } from "@/lib/data";
+import { Button } from "@/components/ui/button";
 
 export function Contact() {
   return (
@@ -32,19 +33,24 @@ export function Contact() {
 
       <div className="flex flex-wrap justify-center gap-6">
         {contactLinks.map((link) => (
-          <a
+          <Button
             key={link.label}
-            href={link.href}
-            {...(link.external
-              ? { target: "_blank", rel: "noopener noreferrer" }
-              : {})}
-            className="group flex items-center gap-2.5 rounded-[10px] border border-border-subtle bg-surface px-6 py-3.5 font-mono text-[13px] text-text-secondary transition-all hover:-translate-y-0.5 hover:border-green hover:text-green"
+            asChild
+            variant="ghost"
+            className="group h-auto flex gap-2.5 rounded-[10px] border border-border-subtle bg-surface px-6 py-3.5 font-mono font-normal text-[13px] text-text-secondary hover:-translate-y-0.5 hover:border-green hover:bg-transparent hover:text-green dark:hover:bg-transparent"
           >
-            <span>{link.label}</span>
-            <span className="transition-transform group-hover:translate-x-0.5">
-              &rarr;
-            </span>
-          </a>
+            <a
+              href={link.href}
+              {...(link.external
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
+              <span>{link.label}</span>
+              <span className="transition-transform group-hover:translate-x-0.5">
+                &rarr;
+              </span>
+            </a>
+          </Button>
         ))}
       </div>
     </section>

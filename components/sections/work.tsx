@@ -1,4 +1,6 @@
 import { metrics, projects } from "@/lib/data";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "./section-header";
 
 export function Work() {
@@ -18,9 +20,9 @@ export function Work() {
       {/* Metrics */}
       <div className="stagger reveal mb-16 grid grid-cols-2 gap-6 lg:grid-cols-4">
         {metrics.map((m) => (
-          <div
+          <Card
             key={m.label}
-            className="rounded-[20px] border border-border-subtle bg-surface p-10 text-center transition-all hover:border-green/15"
+            className="rounded-[20px] border-border-subtle bg-surface p-10 text-center gap-0 shadow-none transition-all hover:border-green/15"
           >
             <div
               className={`mb-2 font-heading text-[40px] font-extrabold tracking-[-2px] ${m.green ? "text-green" : ""}`}
@@ -30,7 +32,7 @@ export function Work() {
             <div className="font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
               {m.label}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -40,9 +42,9 @@ export function Work() {
       </h3>
       <div className="stagger reveal flex flex-col gap-6">
         {projects.map((p) => (
-          <div
+          <Card
             key={p.title}
-            className="group relative grid cursor-pointer grid-cols-1 items-start gap-8 overflow-hidden rounded-[20px] border border-border-subtle bg-surface p-10 transition-all duration-400 hover:translate-x-1 hover:border-border-hover md:grid-cols-[1fr_auto]"
+            className="group relative grid cursor-pointer grid-cols-1 items-start gap-8 overflow-hidden rounded-[20px] border-border-subtle bg-surface p-10 shadow-none transition-all duration-400 hover:translate-x-1 hover:border-border-hover md:grid-cols-[1fr_auto]"
           >
             <span className="absolute top-0 left-0 h-full w-[3px] origin-top scale-y-0 bg-green transition-transform duration-400 group-hover:scale-y-100" />
             <div>
@@ -57,24 +59,28 @@ export function Work() {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {p.tags.map((tag) => (
-                  <span
+                  <Badge
                     key={tag}
-                    className="rounded-md border border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
+                    variant="outline"
+                    className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
                   >
                     {tag}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </div>
             <div className="flex items-start gap-3 md:flex-col md:items-end">
-              <span className="rounded-full border border-border-subtle px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
+              <Badge
+                variant="outline"
+                className="border-border-subtle px-3.5 py-1.5 font-mono font-normal text-[10px] uppercase tracking-[2px] text-text-muted"
+              >
                 {p.type}
-              </span>
+              </Badge>
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border-subtle text-lg text-text-muted transition-all group-hover:translate-x-1 group-hover:border-green group-hover:text-green">
                 &rarr;
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </section>

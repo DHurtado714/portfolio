@@ -1,4 +1,5 @@
 import { identityCards } from "@/lib/data";
+import { Card } from "@/components/ui/card";
 import { SectionHeader } from "./section-header";
 
 export function About() {
@@ -44,19 +45,19 @@ export function About() {
 
         <div className="stagger grid grid-cols-1 gap-4 sm:grid-cols-2">
           {identityCards.map((card) => (
-            <div
+            <Card
               key={card.title}
-              className="group relative overflow-hidden rounded-xl border border-border-subtle bg-surface p-6 transition-all hover:-translate-y-0.5 hover:border-border-hover"
+              className="group relative overflow-hidden border-border-subtle bg-surface p-6 gap-0 shadow-none transition-all hover:-translate-y-0.5 hover:border-border-hover"
             >
               <span className="absolute top-0 left-0 right-0 h-0.5 origin-left scale-x-0 bg-green transition-transform group-hover:scale-x-100" />
               <span className="mb-3 block text-2xl">{card.icon}</span>
               <h4 className="mb-1.5 font-heading text-[15px] font-bold">
                 {card.title}
               </h4>
-              <p className="text-[13px] leading-[1.5] text-text-muted">
+              <p className="text-[13px] leading-normal text-text-muted">
                 {card.desc}
               </p>
-            </div>
+            </Card>
           ))}
         </div>
       </div>

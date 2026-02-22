@@ -1,4 +1,6 @@
 import { expertiseData } from "@/lib/data";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "./section-header";
 
 export function Expertise() {
@@ -18,9 +20,9 @@ export function Expertise() {
 
       <div className="stagger reveal grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {expertiseData.map((item) => (
-          <div
+          <Card
             key={item.title}
-            className="group relative overflow-hidden rounded-[20px] border border-border-subtle bg-surface p-8 transition-all duration-400 hover:-translate-y-1 hover:border-green/20"
+            className="group relative overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-all duration-400 hover:-translate-y-1 hover:border-green/20"
           >
             <div
               className="pointer-events-none absolute bottom-0 left-0 right-0 h-[120px] opacity-0 transition-opacity duration-400 group-hover:opacity-100"
@@ -39,15 +41,16 @@ export function Expertise() {
             </p>
             <div className="relative z-[1] flex flex-wrap gap-1.5">
               {item.tags.map((tag) => (
-                <span
+                <Badge
                   key={tag}
-                  className="rounded-md border border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
+                  variant="outline"
+                  className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
                 >
                   {tag}
-                </span>
+                </Badge>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </section>
