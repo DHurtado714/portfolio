@@ -10,21 +10,12 @@ import { Footer } from "@/components/sections/footer";
 import {
   CursorGlow,
   ActiveNavHighlight,
+  SectionScrollFade,
 } from "@/components/client-effects";
-
-function GridBackground() {
-  return (
-    <div
-      className="fixed inset-0 -z-10 opacity-[0.025]"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-        backgroundSize: "80px 80px",
-      }}
-    />
-  );
-}
-
+import { GridParallax } from "@/components/motion/grid-parallax";
+import { LoadingScreen } from "@/components/loading-screen";
+import { LayoutGroup } from "@/components/motion/layout-group-wrapper";
+import { TerminalLoader } from "@/components/terminal/terminal-loader";
 function SectionDivider() {
   return (
     <div className="mx-auto max-w-[1400px] px-5 md:px-12">
@@ -67,11 +58,13 @@ function JsonLd() {
 
 export default function Home() {
   return (
-    <>
+    <LayoutGroup>
       <JsonLd />
-      <GridBackground />
+      <LoadingScreen />
+      <GridParallax />
       <CursorGlow />
       <ActiveNavHighlight />
+      <SectionScrollFade />
 
       <Navigation />
 
@@ -86,12 +79,15 @@ export default function Home() {
         <SectionDivider />
         <Experience />
         <SectionDivider />
+        {/* <GitHubActivity /> */}
+        <SectionDivider />
         <Beyond />
         <SectionDivider />
         <Contact />
       </main>
 
       <Footer />
-    </>
+      <TerminalLoader />
+    </LayoutGroup>
   );
 }

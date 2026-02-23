@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ParallaxLayer } from "@/components/motion/parallax-layer";
 import { HeroEntrance, HeroItem } from "@/components/motion/hero-entrance";
+import { Typewriter } from "@/components/motion/typewriter";
+import { ShimmerText } from "@/components/motion/shimmer";
 
 export function Hero() {
   return (
@@ -22,7 +24,7 @@ export function Hero() {
         <HeroEntrance>
           <HeroItem>
             <div className="font-mono text-xs uppercase tracking-[4px] text-green">
-              Software Engineer &mdash; Backend &middot; Fintech &middot; ML
+              <Typewriter text="Software Engineer — Backend · Fintech · ML" speed={35} startDelay={600} />
             </div>
           </HeroItem>
 
@@ -30,9 +32,9 @@ export function Hero() {
             <h1 className="mt-8 font-heading text-[clamp(44px,7vw,88px)] leading-[1.05] font-extrabold tracking-[-3px]">
               <span className="block">I think in</span>
               <span className="block">
-                <span className="bg-gradient-to-br from-[#00C878] via-[#00E88F] to-[#00FFB2] bg-clip-text text-transparent">
+                <ShimmerText className="bg-gradient-to-br from-[#00C878] via-[#00E88F] to-[#00FFB2] bg-clip-text text-transparent">
                   systems
-                </span>{" "}
+                </ShimmerText>{" "}
                 and
               </span>
               <span className="block">build with code.</span>
@@ -65,13 +67,13 @@ export function Hero() {
             </div>
           </HeroItem>
 
-          <HeroItem>
-            <div className="absolute bottom-10 left-5 hidden items-center gap-3 font-mono text-[10px] tracking-[2px] text-text-muted md:flex md:left-12">
-              <span>SCROLL</span>
-              <div className="h-px w-10 animate-scroll-pulse bg-gradient-to-r from-green to-transparent" />
-            </div>
-          </HeroItem>
         </HeroEntrance>
+
+        {/* Scroll indicator — positioned relative to section, outside HeroEntrance */}
+        <div className="absolute bottom-10 left-5 hidden items-center gap-3 font-mono text-[10px] tracking-[2px] text-text-muted md:flex md:left-12">
+          <span>SCROLL</span>
+          <div className="h-px w-10 animate-scroll-pulse bg-linear-to-r from-green to-transparent" />
+        </div>
       </section>
     </ParallaxLayer>
   );

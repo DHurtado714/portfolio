@@ -55,3 +55,39 @@ export function ActiveNavHighlight() {
 
   return null;
 }
+
+export function SectionScrollFade() {
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const sections = document.querySelectorAll("section[id]");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target as HTMLElement;
+          if (entry.isIntersecting) {
+            el.style.opacity = "1";
+            el.style.transition = "opacity 0.5s ease-out";
+          } else {
+            const rect = entry.boundingClientRect;
+            // Only fade sections that have scrolled above viewport
+            if (rect.bottom < 0) {
+              el.style.opacity = "0.3";
+              el.style.transition = "opacity 0.5s ease-out";
+            }
+          }
+        });
+      },
+      { threshold: [0, 0.1] }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
+  return null;
+}

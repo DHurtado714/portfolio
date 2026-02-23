@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "./section-header";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
+import { HoverLiftCard } from "@/components/motion/hover-lift-card";
 
 export function Expertise() {
   return (
@@ -22,7 +23,8 @@ export function Expertise() {
       <StaggerContainer className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {expertiseData.map((item) => (
           <StaggerItem key={item.title}>
-            <Card className="group relative overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-all duration-400 hover:-translate-y-1 hover:border-green/20">
+            <HoverLiftCard>
+            <Card className="group relative overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-all duration-400 hover:border-green/20">
               <div
                 className="pointer-events-none absolute bottom-0 left-0 right-0 h-[120px] opacity-0 transition-opacity duration-400 group-hover:opacity-100"
                 style={{
@@ -50,6 +52,7 @@ export function Expertise() {
                 ))}
               </div>
             </Card>
+            </HoverLiftCard>
           </StaggerItem>
         ))}
       </StaggerContainer>
