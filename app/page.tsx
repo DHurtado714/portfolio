@@ -8,10 +8,8 @@ import { Beyond } from "@/components/sections/beyond";
 import { Contact } from "@/components/sections/contact";
 import { Footer } from "@/components/sections/footer";
 import {
-  ScrollReveal,
   CursorGlow,
   ActiveNavHighlight,
-  HeroParallax,
 } from "@/components/client-effects";
 
 function GridBackground() {
@@ -73,9 +71,7 @@ export default function Home() {
       <JsonLd />
       <GridBackground />
       <CursorGlow />
-      <ScrollReveal />
       <ActiveNavHighlight />
-      <HeroParallax />
 
       <Navigation />
 

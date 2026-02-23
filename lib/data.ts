@@ -2,15 +2,19 @@
 
 export interface Metric {
   value: string;
+  numericTarget: number;
+  prefix: string;
+  suffix: string;
+  decimals: number;
   label: string;
   green: boolean;
 }
 
 export const metrics: Metric[] = [
-  { value: "$200M+", label: "Transaction Volume", green: true },
-  { value: "3", label: "Countries", green: false },
-  { value: "5+", label: "Exchange Integrations", green: false },
-  { value: "99.9%", label: "System Uptime", green: true },
+  { value: "$200M+", numericTarget: 200, prefix: "$", suffix: "M+", decimals: 0, label: "Transaction Volume", green: true },
+  { value: "3", numericTarget: 3, prefix: "", suffix: "", decimals: 0, label: "Countries", green: false },
+  { value: "5+", numericTarget: 5, prefix: "", suffix: "+", decimals: 0, label: "Exchange Integrations", green: false },
+  { value: "99.9%", numericTarget: 99.9, prefix: "", suffix: "%", decimals: 1, label: "System Uptime", green: true },
 ];
 
 // ─── Projects (Work section) ─────────────────────────────────────────────────

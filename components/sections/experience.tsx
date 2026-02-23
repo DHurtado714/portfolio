@@ -1,5 +1,8 @@
 import { timeline } from "@/lib/data";
 import { SectionHeader } from "./section-header";
+import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import { TimelineDrawLine } from "@/components/motion/timeline-draw";
 
 export function Experience() {
   return (
@@ -16,38 +19,44 @@ export function Experience() {
         thinking.
       </p>
 
-      <div className="reveal relative pl-10">
-        {/* Timeline line */}
-        <div className="absolute top-2 bottom-2 left-0 w-px bg-gradient-to-b from-green via-border-subtle to-transparent" />
+      <div className="relative pl-10">
+        {/* Scroll-linked timeline line */}
+        <TimelineDrawLine />
 
-        {timeline.map((item) => (
-          <div key={item.role} className="relative pb-12">
-            {/* Dot */}
-            <div
-              className={`absolute -left-11 top-2 h-2 w-2 rounded-full ${
-                item.current
-                  ? "bg-green shadow-[0_0_12px_rgba(0,200,120,0.3)]"
-                  : "bg-border-hover"
-              }`}
-            />
-            <div
-              className={`mb-2 font-mono text-[11px] tracking-[2px] ${
-                item.current ? "text-green" : "text-text-muted"
-              }`}
-            >
-              {item.date}
-            </div>
-            <div className="mb-1 font-heading text-xl font-bold">
-              {item.role}
-            </div>
-            <div className="mb-3 text-[15px] text-text-secondary">
-              {item.company}
-            </div>
-            <p className="max-w-[500px] text-sm leading-[1.7] text-text-muted">
-              {item.desc}
-            </p>
-          </div>
-        ))}
+        <StaggerContainer>
+          {timeline.map((item) => (
+            <StaggerItem key={item.role}>
+              <div className="relative pb-12">
+                {/* Dot */}
+                <ScrollReveal direction="up" className="absolute -left-11 top-2">
+                  <div
+                    className={`h-2 w-2 rounded-full ${
+                      item.current
+                        ? "bg-green shadow-[0_0_12px_rgba(0,200,120,0.3)]"
+                        : "bg-border-hover"
+                    }`}
+                  />
+                </ScrollReveal>
+                <div
+                  className={`mb-2 font-mono text-[11px] tracking-[2px] ${
+                    item.current ? "text-green" : "text-text-muted"
+                  }`}
+                >
+                  {item.date}
+                </div>
+                <div className="mb-1 font-heading text-xl font-bold">
+                  {item.role}
+                </div>
+                <div className="mb-3 text-[15px] text-text-secondary">
+                  {item.company}
+                </div>
+                <p className="max-w-[500px] text-sm leading-[1.7] text-text-muted">
+                  {item.desc}
+                </p>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
       </div>
     </section>
   );

@@ -1,3 +1,5 @@
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
+
 export function SectionHeader({
   number,
   label,
@@ -6,13 +8,15 @@ export function SectionHeader({
   label: string;
 }) {
   return (
-    <div className="mb-4 flex items-baseline gap-4">
-      <span className="font-mono text-xs tracking-[2px] text-green">
-        {number}
-      </span>
-      <span className="font-mono text-xs uppercase tracking-[3px] text-text-muted">
-        {label}
-      </span>
-    </div>
+    <ScrollReveal direction="left">
+      <div className="mb-4 flex items-baseline gap-4">
+        <span className="font-mono text-xs tracking-[2px] text-green">
+          {number}
+        </span>
+        <span className="font-mono text-xs uppercase tracking-[3px] text-text-muted">
+          {label}
+        </span>
+      </div>
+    </ScrollReveal>
   );
 }

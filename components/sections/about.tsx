@@ -1,6 +1,8 @@
 import { identityCards } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "./section-header";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
+import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 
 export function About() {
   return (
@@ -12,54 +14,55 @@ export function About() {
         but how I think.
       </h2>
 
-      <div className="reveal grid items-start gap-12 md:grid-cols-2 md:gap-16">
-        <div>
-          <p className="mb-4 text-base leading-[1.8] text-text-secondary">
-            I&apos;m a{" "}
-            <strong className="font-semibold text-foreground">
-              Colombian engineer
-            </strong>{" "}
-            who sees the world as interconnected systems. Whether it&apos;s a
-            payment pipeline processing millions or the way a city&apos;s
-            infrastructure flows &mdash; I&apos;m drawn to understanding the
-            architecture underneath.
-          </p>
-          <p className="mb-4 text-base leading-[1.8] text-text-secondary">
-            My work sits at the intersection of{" "}
-            <strong className="font-semibold text-foreground">
-              backend engineering, financial systems, and machine learning
-            </strong>
-            . I build the invisible infrastructure that makes money move,
-            identities verify, and data transform into decisions.
-          </p>
-          <p className="text-base leading-[1.8] text-text-secondary">
-            But I&apos;m more than my IDE. I&apos;m a{" "}
-            <strong className="font-semibold text-foreground">
-              digital nomad
-            </strong>{" "}
-            who thinks best after a paddle tennis match, trades options for the
-            intellectual challenge, and believes the best code comes from
-            engineers who actually live in the world they&apos;re building for.
-          </p>
-        </div>
+      <div className="grid items-start gap-12 md:grid-cols-2 md:gap-16">
+        <ScrollReveal direction="up">
+          <div>
+            <p className="mb-4 text-base leading-[1.8] text-text-secondary">
+              I&apos;m a{" "}
+              <strong className="font-semibold text-foreground">
+                Colombian engineer
+              </strong>{" "}
+              who sees the world as interconnected systems. Whether it&apos;s a
+              payment pipeline processing millions or the way a city&apos;s
+              infrastructure flows &mdash; I&apos;m drawn to understanding the
+              architecture underneath.
+            </p>
+            <p className="mb-4 text-base leading-[1.8] text-text-secondary">
+              My work sits at the intersection of{" "}
+              <strong className="font-semibold text-foreground">
+                backend engineering, financial systems, and machine learning
+              </strong>
+              . I build the invisible infrastructure that makes money move,
+              identities verify, and data transform into decisions.
+            </p>
+            <p className="text-base leading-[1.8] text-text-secondary">
+              But I&apos;m more than my IDE. I&apos;m a{" "}
+              <strong className="font-semibold text-foreground">
+                digital nomad
+              </strong>{" "}
+              who thinks best after a paddle tennis match, trades options for the
+              intellectual challenge, and believes the best code comes from
+              engineers who actually live in the world they&apos;re building for.
+            </p>
+          </div>
+        </ScrollReveal>
 
-        <div className="stagger grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {identityCards.map((card) => (
-            <Card
-              key={card.title}
-              className="group relative overflow-hidden border-border-subtle bg-surface p-6 gap-0 shadow-none transition-all hover:-translate-y-0.5 hover:border-border-hover"
-            >
-              <span className="absolute top-0 left-0 right-0 h-0.5 origin-left scale-x-0 bg-green transition-transform group-hover:scale-x-100" />
-              <span className="mb-3 block text-2xl">{card.icon}</span>
-              <h4 className="mb-1.5 font-heading text-[15px] font-bold">
-                {card.title}
-              </h4>
-              <p className="text-[13px] leading-normal text-text-muted">
-                {card.desc}
-              </p>
-            </Card>
+            <StaggerItem key={card.title}>
+              <Card className="group relative overflow-hidden border-border-subtle bg-surface p-6 gap-0 shadow-none transition-all hover:-translate-y-0.5 hover:border-border-hover">
+                <span className="absolute top-0 left-0 right-0 h-0.5 origin-left scale-x-0 bg-green transition-transform group-hover:scale-x-100" />
+                <span className="mb-3 block text-2xl">{card.icon}</span>
+                <h4 className="mb-1.5 font-heading text-[15px] font-bold">
+                  {card.title}
+                </h4>
+                <p className="text-[13px] leading-normal text-text-muted">
+                  {card.desc}
+                </p>
+              </Card>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

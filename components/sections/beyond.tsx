@@ -1,6 +1,8 @@
 import { beyondCards } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "./section-header";
+import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
+import { TiltCard } from "@/components/motion/tilt-card";
 
 export function Beyond() {
   return (
@@ -16,22 +18,23 @@ export function Beyond() {
         editors. Context, curiosity, and movement fuel better thinking.
       </p>
 
-      <div className="stagger reveal grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <StaggerContainer className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
         {beyondCards.map((card) => (
-          <Card
-            key={card.title}
-            className="overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-all hover:-translate-y-0.5 hover:border-border-hover"
-          >
-            <span className="mb-4 block text-[32px]">{card.emoji}</span>
-            <h4 className="mb-2 font-heading text-[17px] font-bold">
-              {card.title}
-            </h4>
-            <p className="text-[13px] leading-relaxed text-text-muted">
-              {card.desc}
-            </p>
-          </Card>
+          <StaggerItem key={card.title}>
+            <TiltCard>
+              <Card className="overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-colors hover:border-border-hover">
+                <span className="mb-4 block text-[32px]">{card.emoji}</span>
+                <h4 className="mb-2 font-heading text-[17px] font-bold">
+                  {card.title}
+                </h4>
+                <p className="text-[13px] leading-relaxed text-text-muted">
+                  {card.desc}
+                </p>
+              </Card>
+            </TiltCard>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
     </section>
   );
 }
