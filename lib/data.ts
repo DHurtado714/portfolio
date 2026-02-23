@@ -11,9 +11,9 @@ export interface Metric {
 }
 
 export const metrics: Metric[] = [
-  { value: "$200M+", numericTarget: 200, prefix: "$", suffix: "M+", decimals: 0, label: "Transaction Volume", green: true },
-  { value: "3", numericTarget: 3, prefix: "", suffix: "", decimals: 0, label: "Countries", green: false },
-  { value: "5+", numericTarget: 5, prefix: "", suffix: "+", decimals: 0, label: "Exchange Integrations", green: false },
+  { value: "$300M+", numericTarget: 300, prefix: "$", suffix: "M+", decimals: 0, label: "Transaction Volume", green: true },
+  { value: "4", numericTarget: 4, prefix: "", suffix: "", decimals: 0, label: "Regions", green: false },
+  { value: "3+", numericTarget: 3, prefix: "", suffix: "+", decimals: 0, label: "Years of Experience", green: false },
   { value: "99.9%", numericTarget: 99.9, prefix: "", suffix: "%", decimals: 1, label: "System Uptime", green: true },
 ];
 
@@ -29,38 +29,38 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    title: "Cross-Border Payment Engine",
-    year: "2024",
-    desc: "Real-time currency conversion and settlement system processing transactions across Mexico, Colombia, and Dominican Republic. Handles multiple exchange providers, fee calculations, and regulatory compliance per jurisdiction.",
-    tags: ["NestJS", "TypeScript", "AWS", "PostgreSQL", "Event-Driven"],
+    title: "Cross-Border Payment Infrastructure",
+    year: "2022–Present",
+    desc: "Built and maintained cross-border payment systems processing $300M+ USD in transaction volume across Mexico, USA, Europe, and Dominican Republic. Designed dynamic fee calculation and routing systems across multiple providers, optimizing transaction costs by 15%.",
+    tags: ["NestJS", "TypeScript", "AWS", "PostgreSQL", "Event-Driven", "RabbitMQ"],
     type: "Backend",
   },
   {
-    title: "KYC/KYB Verification Pipeline",
-    year: "2024",
-    desc: "Identity verification system for crypto ramp operations. Domain-driven design with clean event architecture, supporting both individual and business verification flows across multiple regulatory frameworks.",
-    tags: ["DDD", "TypeORM", "Events", "Compliance"],
+    title: "KYC Verification Module",
+    year: "2023",
+    desc: "Deployed automated KYC verification module reducing onboarding time by 40% and ensuring regulatory compliance across LATAM markets. Domain-driven design with clean event architecture.",
+    tags: ["DDD", "TypeORM", "Events", "Compliance", "NestJS"],
     type: "Backend",
   },
   {
-    title: "Crypto Ramp Integration Layer",
-    year: "2023–2024",
-    desc: "Unified integration layer connecting multiple exchanges (Bitso, Rio, Walapay) with standardized interfaces, idempotent transactions, and real-time exchange rate management.",
-    tags: ["API Design", "Idempotency", "Crypto", "FX Rates"],
-    type: "Full-Stack",
-  },
-  {
-    title: "ML Risk Assessment Model",
+    title: "AI Risk Assessment Platform",
     year: "2024",
-    desc: "Machine learning model for transaction risk scoring and anomaly detection. Combining financial domain knowledge with classification algorithms to flag suspicious patterns in real-time payment flows.",
-    tags: ["Python", "ML", "Classification", "Risk"],
+    desc: "Developed ensemble ML models (XGBoost, Random Forest, Isolation Forest) achieving 60% reduction in false positives and 0.95+ AUC-ROC for fraud detection. Built FastAPI application with sub-200ms response times and SHAP-based explainable credit scoring.",
+    tags: ["Python", "FastAPI", "XGBoost", "Redis", "Docker", "Prometheus"],
     type: "ML",
   },
   {
-    title: "Observability & Monitoring Platform",
+    title: "LinkBridge — Enterprise Workflow Platform",
     year: "2023",
-    desc: "End-to-end monitoring infrastructure with custom dashboards, alerting, and distributed tracing. Providing real-time visibility into payment processing health across all services.",
-    tags: ["Prometheus", "Grafana", "Docker", "AWS"],
+    desc: "Architected full-stack task management system with integrated PTO tracking and custom notification engine. WebSocket-based real-time collaboration enabling seamless team coordination for 50+ concurrent users.",
+    tags: ["React", "Node.js", "Firebase", "AWS S3", "WebSocket", "Zustand"],
+    type: "Full-Stack",
+  },
+  {
+    title: "AWS Production Infrastructure",
+    year: "2022–Present",
+    desc: "Owned production infrastructure on AWS (ECS, RDS, DocumentDB, ElastiCache, S3, Lambda) ensuring 99.9% uptime for financial transactions. Event-driven architecture handling +1M daily transaction volume with sub-second latency.",
+    tags: ["AWS", "ECS", "Terraform", "Docker", "Monitoring", "CI/CD"],
     type: "DevOps",
   },
 ];
@@ -77,24 +77,24 @@ export interface TimelineEntry {
 
 export const timeline: TimelineEntry[] = [
   {
-    date: "2023 — PRESENT",
+    date: "2022 — PRESENT",
     role: "Software Engineer",
-    company: "Fintech — Cross-border Payments",
-    desc: "Building the core payment infrastructure processing $200M+ across Mexico, Colombia, and Dominican Republic. Leading backend architecture decisions, designing event-driven systems, and integrating multiple exchange providers and regulatory frameworks.",
+    company: "Capa.fi — Cross-border Payments",
+    desc: "Building core payment infrastructure processing $300M+ across Mexico, USA, Europe, and Dominican Republic. Owning AWS production infrastructure, designing event-driven systems, and optimizing payment routing across multiple providers.",
     current: true,
   },
   {
-    date: "PREVIOUS",
-    role: "Full-Stack Engineer",
-    company: "Various — Tech & Finance",
-    desc: "Built web applications, APIs, and data systems across multiple domains. Developed expertise in TypeScript ecosystems, cloud infrastructure, and the fundamentals of clean, testable architecture.",
+    date: "2023",
+    role: "Full-Stack Developer",
+    company: "Zeitgeist Consulting — LinkBridge",
+    desc: "Architected enterprise workflow platform with real-time collaboration, PTO tracking, and multi-cloud infrastructure across Firebase and AWS. Achieved 40% faster development cycles using modern React frameworks.",
     current: false,
   },
   {
-    date: "CONTINUOUS",
-    role: "Independent Learner",
-    company: "ML, Trading Systems, Blockchain",
-    desc: "Self-directed exploration of machine learning applications, options trading strategies, blockchain development, and emerging technologies. Currently expanding into Spring Boot and enterprise Java for finance industry opportunities.",
+    date: "2021 — 2025",
+    role: "BS Computer Science",
+    company: "Tec de Monterrey (ITESM)",
+    desc: "Computer Science and Technology at Monterrey Institute of Technology. GPA 96.2/100. Combining academic foundations with real-world engineering experience throughout the program.",
     current: false,
   },
 ];
@@ -112,38 +112,38 @@ export const expertiseData: ExpertiseItem[] = [
   {
     icon: "❯_",
     title: "Backend Architecture",
-    desc: "Designing and building scalable APIs, microservices, and modular monoliths. Event-driven systems with clean domain boundaries and bulletproof reliability.",
-    tags: ["TypeScript", "NestJS", "Node.js", "DDD", "REST", "PostgreSQL", "TypeORM"],
+    desc: "Designing and building scalable APIs, microservices, and event-driven systems. Clean domain boundaries with bulletproof reliability for financial transactions.",
+    tags: ["TypeScript", "NestJS", "Node.js", "Java", "Spring Boot", "PostgreSQL", "RabbitMQ"],
   },
   {
     icon: "${}",
     title: "Fintech & Payments",
-    desc: "Cross-border payment engines, crypto ramp integrations, KYC/KYB pipelines, fee calculation systems, and exchange rate management at scale.",
-    tags: ["Payments", "Crypto", "KYC/KYB", "Compliance", "FX Rates", "Idempotency"],
+    desc: "Cross-border payment engines, dynamic fee routing, KYC pipelines, and exchange rate management processing $300M+ across 4 regions.",
+    tags: ["Payments", "KYC", "Compliance", "FX Rates", "Idempotency", "Settlement"],
   },
   {
     icon: "≡·",
     title: "ML & Data Systems",
-    desc: "Applying machine learning to real problems — risk assessment, pattern recognition, and building the data pipelines that feed intelligent systems.",
-    tags: ["Python", "ML Models", "Risk Scoring", "Data Pipelines", "Classification"],
+    desc: "Ensemble ML models for fraud detection and risk scoring. Explainable AI with SHAP, achieving 0.95+ AUC-ROC in production systems.",
+    tags: ["Python", "FastAPI", "XGBoost", "TensorFlow", "SHAP", "Risk Scoring"],
   },
   {
     icon: "☁",
     title: "Cloud & DevOps",
-    desc: "Infrastructure as code, containerized deployments, monitoring, and observability — because great backend code needs great infrastructure.",
-    tags: ["AWS", "Docker", "IaC", "Prometheus", "Grafana", "CI/CD"],
+    desc: "AWS production infrastructure for fintech — ECS, RDS, ElastiCache, Lambda. Infrastructure as code, monitoring, and 99.9% uptime.",
+    tags: ["AWS", "Docker", "Terraform", "Prometheus", "Grafana", "CI/CD"],
   },
   {
     icon: "△▽",
     title: "Full-Stack Capability",
-    desc: "Backend-first, but fully capable across the stack. I build complete products when needed, from database to UI.",
-    tags: ["React", "Next.js", "HTML/CSS", "REST APIs", "Webhooks"],
+    desc: "Backend-first, but fully capable across the stack. Building complete products from database to UI when needed.",
+    tags: ["React", "Next.js", "Firebase", "REST APIs", "WebSocket", "Zustand"],
   },
   {
     icon: "⚐",
     title: "System Design",
-    desc: "Architectural thinking at every level — domain modeling, event sourcing patterns, distributed transactions, and clean boundaries.",
-    tags: ["Event-Driven", "CQRS", "Clean Arch", "Saga Pattern", "Testing"],
+    desc: "Architectural thinking at every level — domain modeling, event-driven patterns, distributed transactions, and clean boundaries.",
+    tags: ["Event-Driven", "DDD", "Clean Arch", "Saga Pattern", "CQRS", "Testing"],
   },
 ];
 
@@ -163,13 +163,13 @@ export const identityCards: IdentityCard[] = [
   },
   {
     icon: "△",
-    title: "LATAM Native",
-    desc: "Building for the region I live in. Context is a competitive advantage.",
+    title: "Colombian Engineer",
+    desc: "Building fintech for LATAM from the inside. Context is a competitive advantage.",
   },
   {
     icon: "◯",
     title: "Perpetual Learner",
-    desc: "From ML models to Spring Boot — always expanding the stack.",
+    desc: "From ML models to Spring Boot to Solidity — always expanding the stack.",
   },
   {
     icon: "▢",
@@ -189,13 +189,13 @@ export interface BeyondCard {
 export const beyondCards: BeyondCard[] = [
   {
     emoji: "🌎",
-    title: "Digital Nomad",
-    desc: "Working remotely across LATAM — Medellín, Buenos Aires, and beyond. Building for a region while actually living in it gives me an edge most remote engineers don\u2019t have.",
+    title: "Remote Engineer",
+    desc: "Working remotely from Colombia building fintech infrastructure that spans continents. Living in the region I build for gives me an edge most remote engineers don\u2019t have.",
   },
   {
     emoji: "🏓",
-    title: "Fitness & Paddle Tennis",
-    desc: "Daily gym sessions and paddle matches keep me sharp. The discipline of physical training translates directly to how I approach engineering challenges.",
+    title: "Paddle Tennis & Golf",
+    desc: "Paddle matches and golf rounds keep me sharp. The discipline of physical training translates directly to how I approach engineering challenges.",
   },
   {
     emoji: "📈",
@@ -205,7 +205,7 @@ export const beyondCards: BeyondCard[] = [
   {
     emoji: "🧠",
     title: "ML Exploration",
-    desc: "Constantly experimenting with machine learning applications — from CAPTCHA systems to risk models. Where engineering meets intelligence.",
+    desc: "Constantly experimenting with machine learning — from fraud detection models to risk scoring systems. Where engineering meets intelligence.",
   },
   {
     emoji: "⚡",
@@ -215,7 +215,7 @@ export const beyondCards: BeyondCard[] = [
   {
     emoji: "📚",
     title: "Continuous Growth",
-    desc: "Currently exploring Spring Boot, enterprise patterns, and expanding into new language ecosystems. The stack is a tool, not an identity.",
+    desc: "AWS certified, Ethereum bootcamp graduate, and always exploring new ecosystems. The stack is a tool, not an identity.",
   },
 ];
 
@@ -228,8 +228,7 @@ export interface ContactLink {
 }
 
 export const contactLinks: ContactLink[] = [
-  { label: "Email", href: "mailto:daniel@email.com", external: false },
-  { label: "GitHub", href: "https://github.com/daniel", external: true },
-  { label: "LinkedIn", href: "https://linkedin.com/in/daniel", external: true },
-  { label: "Twitter / X", href: "https://twitter.com/daniel", external: true },
+  { label: "Email", href: "mailto:danielhurtado714@gmail.com", external: false },
+  { label: "GitHub", href: "https://github.com/DHurtado714", external: true },
+  { label: "LinkedIn", href: "https://linkedin.com/in/daniel-hurtado", external: true },
 ];

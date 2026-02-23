@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { useRef } from "react";
-import { contributionDays } from "@/lib/github-data";
+import type { ContributionDay } from "@/lib/github-data";
 
 const LEVEL_COLORS = [
   "bg-surface-elevated",
@@ -15,7 +14,11 @@ const LEVEL_COLORS = [
 
 const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
 
-export function ContributionGraph() {
+export function ContributionGraph({
+  contributions,
+}: {
+  contributions: ContributionDay[];
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   const shouldReduceMotion = useReducedMotion();
@@ -26,13 +29,11 @@ export function ContributionGraph() {
     y: number;
   } | null>(null);
 
-  // Organize days into weeks (columns) of 7 days each
-  const weeks: (typeof contributionDays)[] = [];
-  for (let i = 0; i < contributionDays.length; i += 7) {
-    weeks.push(contributionDays.slice(i, i + 7));
+  const weeks: ContributionDay[][] = [];
+  for (let i = 0; i < contributions.length; i += 7) {
+    weeks.push(contributions.slice(i, i + 7));
   }
 
-  // Generate month labels
   const monthLabels: { label: string; col: number }[] = [];
   let lastMonth = "";
   weeks.forEach((week, colIndex) => {
@@ -48,7 +49,6 @@ export function ContributionGraph() {
 
   return (
     <div ref={ref} className="relative overflow-x-auto">
-      {/* Month labels */}
       <div className="mb-2 flex pl-8">
         {monthLabels.map((m, i) => (
           <span
@@ -65,7 +65,6 @@ export function ContributionGraph() {
       </div>
 
       <div className="mt-6 flex gap-0.5">
-        {/* Day labels */}
         <div className="flex flex-col gap-0.5 pr-2 pt-0">
           {DAY_LABELS.map((label, i) => (
             <div
@@ -77,57 +76,46 @@ export function ContributionGraph() {
           ))}
         </div>
 
-        {/* Grid */}
         {weeks.map((week, colIndex) => (
           <div key={colIndex} className="flex flex-col gap-0.5">
-            {week.map((day, rowIndex) => {
-              const flatIndex = colIndex * 7 + rowIndex;
-              return (
-                <motion.div
-                  key={day.date}
-                  className={`h-[13px] w-[13px] rounded-sm ${LEVEL_COLORS[day.level]} cursor-pointer transition-colors hover:ring-1 hover:ring-green/50`}
-                  initial={
-                    shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0 }
+            {week.map((day) => (
+              <motion.div
+                key={day.date}
+                className={`h-[13px] w-[13px] rounded-sm ${LEVEL_COLORS[day.level]} cursor-pointer transition-colors hover:ring-1 hover:ring-green/50`}
+                initial={
+                  shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0 }
+                }
+                animate={
+                  isInView
+                    ? { opacity: 1, scale: 1 }
+                    : shouldReduceMotion
+                      ? { opacity: 1 }
+                      : { opacity: 0, scale: 0 }
+                }
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { delay: colIndex * 0.02, duration: 0.2 }
+                }
+                onMouseEnter={(e) => {
+                  const rect = (e.target as HTMLElement).getBoundingClientRect();
+                  const parentRect = ref.current?.getBoundingClientRect();
+                  if (parentRect) {
+                    setHoveredDay({
+                      date: day.date,
+                      count: day.count,
+                      x: rect.left - parentRect.left + 6,
+                      y: rect.top - parentRect.top - 32,
+                    });
                   }
-                  animate={
-                    isInView
-                      ? { opacity: 1, scale: 1 }
-                      : shouldReduceMotion
-                        ? { opacity: 1 }
-                        : { opacity: 0, scale: 0 }
-                  }
-                  transition={
-                    shouldReduceMotion
-                      ? { duration: 0 }
-                      : {
-                          delay: colIndex * 0.02,
-                          duration: 0.2,
-                        }
-                  }
-                  onMouseEnter={(e) => {
-                    const rect = (
-                      e.target as HTMLElement
-                    ).getBoundingClientRect();
-                    const parentRect =
-                      ref.current?.getBoundingClientRect();
-                    if (parentRect) {
-                      setHoveredDay({
-                        date: day.date,
-                        count: day.count,
-                        x: rect.left - parentRect.left + 6,
-                        y: rect.top - parentRect.top - 32,
-                      });
-                    }
-                  }}
-                  onMouseLeave={() => setHoveredDay(null)}
-                />
-              );
-            })}
+                }}
+                onMouseLeave={() => setHoveredDay(null)}
+              />
+            ))}
           </div>
         ))}
       </div>
 
-      {/* Tooltip */}
       {hoveredDay && (
         <div
           className="pointer-events-none absolute z-10 rounded-md bg-surface-elevated px-2.5 py-1.5 font-mono text-[10px] text-text-secondary shadow-lg border border-border-subtle"
@@ -140,7 +128,6 @@ export function ContributionGraph() {
         </div>
       )}
 
-      {/* Legend */}
       <div className="mt-4 flex items-center justify-end gap-2">
         <span className="font-mono text-[10px] text-text-muted">Less</span>
         {LEVEL_COLORS.map((color, i) => (

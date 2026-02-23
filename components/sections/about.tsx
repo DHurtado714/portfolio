@@ -22,27 +22,32 @@ export function About() {
               <strong className="font-semibold text-foreground">
                 Colombian engineer
               </strong>{" "}
+              studying Computer Science at{" "}
+              <strong className="font-semibold text-foreground">
+                Tec de Monterrey
+              </strong>{" "}
               who sees the world as interconnected systems. Whether it&apos;s a
-              payment pipeline processing millions or the way a city&apos;s
-              infrastructure flows &mdash; I&apos;m drawn to understanding the
-              architecture underneath.
+              payment pipeline processing $300M+ or the way financial
+              infrastructure flows across borders &mdash; I&apos;m drawn to
+              understanding the architecture underneath.
             </p>
             <p className="mb-4 text-base leading-[1.8] text-text-secondary">
-              My work sits at the intersection of{" "}
+              My work at{" "}
+              <strong className="font-semibold text-foreground">
+                Capa.fi
+              </strong>{" "}
+              sits at the intersection of{" "}
               <strong className="font-semibold text-foreground">
                 backend engineering, financial systems, and machine learning
               </strong>
-              . I build the invisible infrastructure that makes money move,
-              identities verify, and data transform into decisions.
+              . I build the invisible infrastructure that makes money move
+              across Mexico, USA, Europe, and Dominican Republic.
             </p>
             <p className="text-base leading-[1.8] text-text-secondary">
-              But I&apos;m more than my IDE. I&apos;m a{" "}
-              <strong className="font-semibold text-foreground">
-                digital nomad
-              </strong>{" "}
-              who thinks best after a paddle tennis match, trades options for the
-              intellectual challenge, and believes the best code comes from
-              engineers who actually live in the world they&apos;re building for.
+              But I&apos;m more than my IDE. I think best after a paddle tennis
+              match, trade options for the intellectual challenge, and believe
+              the best code comes from engineers who actually live in the world
+              they&apos;re building for.
             </p>
           </div>
         </ScrollReveal>

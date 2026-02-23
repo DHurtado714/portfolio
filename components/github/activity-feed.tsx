@@ -2,7 +2,7 @@
 
 import { GitCommit, GitPullRequest, CircleDot, Eye, Star } from "lucide-react";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
-import { recentEvents, type GitHubEvent } from "@/lib/github-data";
+import type { GitHubEvent } from "@/lib/github-data";
 
 const typeIcons: Record<GitHubEvent["type"], React.ReactNode> = {
   push: <GitCommit size={14} className="text-green" />,
@@ -12,10 +12,10 @@ const typeIcons: Record<GitHubEvent["type"], React.ReactNode> = {
   star: <Star size={14} className="text-yellow-400" />,
 };
 
-export function ActivityFeed() {
+export function ActivityFeed({ events }: { events: GitHubEvent[] }) {
   return (
     <StaggerContainer className="flex flex-col gap-1">
-      {recentEvents.map((event, i) => (
+      {events.map((event, i) => (
         <StaggerItem key={i}>
           <div className="group flex items-center gap-4 rounded-xl px-4 py-3 transition-colors hover:bg-surface-elevated">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated group-hover:bg-surface">

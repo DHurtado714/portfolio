@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NavEntrance } from "@/components/motion/nav-entrance";
+import { NavLogo } from "@/components/motion/nav-logo";
 
 const navItems = [
   { href: "#about", label: "About" },
@@ -14,13 +15,7 @@ export function Navigation() {
   return (
     <NavEntrance>
       <nav className="fixed top-0 right-0 left-0 z-50 flex h-16 items-center justify-between border-b border-white/[0.04] bg-[#050505]/80 px-5 backdrop-blur-xl backdrop-saturate-[1.2] md:px-12">
-        <Link
-          href="#"
-          className="flex items-center gap-2 font-mono text-sm font-medium"
-        >
-          <span className="text-green opacity-70">{"{"}</span>D
-          <span className="text-green opacity-70">{"}"}</span>
-        </Link>
+        <NavLogo />
 
         <ul className="hidden gap-9 md:flex">
           {navItems.map((item) => (

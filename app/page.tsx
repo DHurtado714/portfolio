@@ -31,7 +31,7 @@ function JsonLd() {
     name: "Daniel Hurtado",
     jobTitle: "Software Engineer",
     description:
-      "Software Engineer specializing in Backend, Fintech & ML. Building systems that move capital across Latin America.",
+      "Software Engineer specializing in Backend, Fintech & ML. Building cross-border payment infrastructure processing $300M+ across Mexico, USA, Europe, and Dominican Republic.",
     knowsAbout: [
       "Backend Architecture",
       "Fintech",
@@ -40,11 +40,13 @@ function JsonLd() {
       "NestJS",
       "Cross-border Payments",
     ],
-    alumniOf: { "@type": "Organization", name: "Self-taught" },
+    alumniOf: {
+      "@type": "CollegeOrUniversity",
+      name: "Monterrey Institute of Technology and Higher Education (ITESM)",
+    },
     sameAs: [
-      "https://github.com/daniel",
-      "https://linkedin.com/in/daniel",
-      "https://twitter.com/daniel",
+      "https://github.com/DHurtado714",
+      "https://linkedin.com/in/daniel-hurtado",
     ],
   };
 

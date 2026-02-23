@@ -45,7 +45,7 @@ export function Hero() {
             <p className="mt-8 max-w-[540px] text-lg leading-[1.7] text-text-secondary">
               Engineer obsessed with how things connect &mdash; from distributed
               architectures to financial flows across borders. Currently building
-              fintech infrastructure in Latin America.
+              cross-border payment infrastructure processing $300M+ at Capa.fi.
             </p>
           </HeroItem>
 

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "./section-header";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 import { CountUp } from "@/components/motion/count-up";
+import { TagCascade, TagItem } from "@/components/motion/tag-cascade";
 
 export function Work() {
   return (
@@ -16,7 +17,7 @@ export function Work() {
       </h2>
       <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
         Systems I&apos;ve built handle real money, real users, and real
-        regulatory complexity across multiple Latin American markets.
+        regulatory complexity across Mexico, USA, Europe, and Dominican Republic.
       </p>
 
       {/* Metrics */}
@@ -61,17 +62,18 @@ export function Work() {
                 <p className="mb-4 max-w-[600px] text-[15px] leading-[1.7] text-text-secondary">
                   {p.desc}
                 </p>
-                <div className="flex flex-wrap gap-1.5">
+                <TagCascade className="flex flex-wrap gap-1.5">
                   {p.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
-                    >
-                      {tag}
-                    </Badge>
+                    <TagItem key={tag}>
+                      <Badge
+                        variant="outline"
+                        className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
+                      >
+                        {tag}
+                      </Badge>
+                    </TagItem>
                   ))}
-                </div>
+                </TagCascade>
               </div>
               <div className="flex items-start gap-3 md:flex-col md:items-end">
                 <Badge

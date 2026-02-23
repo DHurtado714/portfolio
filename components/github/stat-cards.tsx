@@ -3,15 +3,15 @@
 import { Card } from "@/components/ui/card";
 import { CountUp } from "@/components/motion/count-up";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
-import { githubStats } from "@/lib/github-data";
+import type { GitHubStats } from "@/lib/github-data";
 
-export function GitHubStatCards() {
+export function GitHubStatCards({ stats }: { stats: GitHubStats }) {
   return (
     <StaggerContainer className="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
       <StaggerItem>
         <Card className="rounded-[16px] border-border-subtle bg-surface p-6 text-center gap-0 shadow-none transition-all hover:border-green/15">
           <div className="mb-1 font-heading text-[32px] font-extrabold tracking-[-2px] text-green">
-            <CountUp target={githubStats.totalContributions} />
+            <CountUp target={stats.totalContributions} />
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
             Contributions
@@ -21,7 +21,7 @@ export function GitHubStatCards() {
       <StaggerItem>
         <Card className="rounded-[16px] border-border-subtle bg-surface p-6 text-center gap-0 shadow-none transition-all hover:border-green/15">
           <div className="mb-1 font-heading text-[32px] font-extrabold tracking-[-2px]">
-            <CountUp target={githubStats.publicRepos} />
+            <CountUp target={stats.publicRepos} />
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
             Public Repos
@@ -31,7 +31,7 @@ export function GitHubStatCards() {
       <StaggerItem>
         <Card className="rounded-[16px] border-border-subtle bg-surface p-6 text-center gap-0 shadow-none transition-all hover:border-green/15">
           <div className="mb-1 font-heading text-[32px] font-extrabold tracking-[-2px] text-green">
-            {githubStats.primaryLanguage}
+            {stats.primaryLanguage}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
             Primary Language
@@ -41,7 +41,7 @@ export function GitHubStatCards() {
       <StaggerItem>
         <Card className="rounded-[16px] border-border-subtle bg-surface p-6 text-center gap-0 shadow-none transition-all hover:border-green/15">
           <div className="mb-1 font-heading text-[32px] font-extrabold tracking-[-2px]">
-            <CountUp target={githubStats.currentStreak} suffix=" days" />
+            <CountUp target={stats.currentStreak} suffix=" days" />
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
             Current Streak

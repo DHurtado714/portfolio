@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | Daniel Hurtado",
   },
   description:
-    "Software Engineer specializing in Backend, Fintech & ML. Building systems that move capital across Latin America. $200M+ in transactions processed.",
+    "Software Engineer specializing in Backend, Fintech & ML. Building cross-border payment infrastructure processing $300M+ across Mexico, USA, Europe, and Dominican Republic.",
   keywords: [
     "Software Engineer",
     "Backend Developer",
@@ -36,6 +36,10 @@ export const metadata: Metadata = {
     "TypeScript",
     "NestJS",
     "Node.js",
+    "Java",
+    "Spring Boot",
+    "AWS",
+    "Python",
     "Latin America",
     "Cross-border Payments",
     "Colombia",
@@ -47,14 +51,14 @@ export const metadata: Metadata = {
     locale: "en_US",
     title: "Daniel \u2014 Software Engineer | Backend, Fintech & ML",
     description:
-      "Building systems that move capital across Latin America. Backend architecture, fintech infrastructure, and ML systems.",
+      "Building cross-border payment infrastructure processing $300M+. Backend architecture, fintech systems, and ML.",
     siteName: "Daniel Hurtado Portfolio",
   },
   twitter: {
     card: "summary_large_image",
     title: "Daniel \u2014 Software Engineer",
     description:
-      "Backend, Fintech & ML. Building fintech infrastructure in Latin America.",
+      "Backend, Fintech & ML. $300M+ in cross-border payments. AWS certified.",
   },
   robots: {
     index: true,
