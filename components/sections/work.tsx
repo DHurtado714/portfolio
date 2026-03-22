@@ -50,6 +50,7 @@ export function Work() {
       <StaggerContainer className="flex flex-col gap-6">
         {projects.map((p) => (
           <StaggerItem key={p.title} direction="left">
+            <a href={p.href} target="_blank" rel="noopener noreferrer">
             <Card className="group relative grid cursor-pointer grid-cols-1 items-start gap-8 overflow-hidden rounded-[20px] border-border-subtle bg-surface p-10 shadow-none transition-all duration-400 hover:translate-x-1 hover:border-border-hover md:grid-cols-[1fr_auto]">
               <span className="absolute top-0 left-0 h-full w-[3px] origin-top scale-y-0 bg-green transition-transform duration-400 group-hover:scale-y-100" />
               <div>
@@ -87,6 +88,7 @@ export function Work() {
                 </div>
               </div>
             </Card>
+            </a>
           </StaggerItem>
         ))}
       </StaggerContainer>

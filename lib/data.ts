@@ -11,10 +11,42 @@ export interface Metric {
 }
 
 export const metrics: Metric[] = [
-  { value: "$300M+", numericTarget: 300, prefix: "$", suffix: "M+", decimals: 0, label: "Transaction Volume", green: true },
-  { value: "4", numericTarget: 4, prefix: "", suffix: "", decimals: 0, label: "Regions", green: false },
-  { value: "3+", numericTarget: 3, prefix: "", suffix: "+", decimals: 0, label: "Years of Experience", green: false },
-  { value: "99.9%", numericTarget: 99.9, prefix: "", suffix: "%", decimals: 1, label: "System Uptime", green: true },
+  {
+    value: "$300M+",
+    numericTarget: 300,
+    prefix: "$",
+    suffix: "M+",
+    decimals: 0,
+    label: "Transaction Volume",
+    green: true,
+  },
+  {
+    value: "4",
+    numericTarget: 4,
+    prefix: "",
+    suffix: "",
+    decimals: 0,
+    label: "Regions",
+    green: false,
+  },
+  {
+    value: "3+",
+    numericTarget: 3,
+    prefix: "",
+    suffix: "+",
+    decimals: 0,
+    label: "Years of Experience",
+    green: false,
+  },
+  {
+    value: "99.9%",
+    numericTarget: 99.9,
+    prefix: "",
+    suffix: "%",
+    decimals: 1,
+    label: "System Uptime",
+    green: true,
+  },
 ];
 
 // ─── Projects (Work section) ─────────────────────────────────────────────────
@@ -25,6 +57,7 @@ export interface Project {
   desc: string;
   tags: string[];
   type: string;
+  href: string;
 }
 
 export const projects: Project[] = [
@@ -32,15 +65,16 @@ export const projects: Project[] = [
     title: "Cross-Border Payment Infrastructure",
     year: "2022–Present",
     desc: "Built and maintained cross-border payment systems processing $300M+ USD in transaction volume across Mexico, USA, Europe, and Dominican Republic. Designed dynamic fee calculation and routing systems across multiple providers, optimizing transaction costs by 15%.",
-    tags: ["NestJS", "TypeScript", "AWS", "PostgreSQL", "Event-Driven", "RabbitMQ"],
+    tags: [
+      "NestJS",
+      "TypeScript",
+      "AWS",
+      "PostgreSQL",
+      "Event-Driven",
+      "RabbitMQ",
+    ],
     type: "Backend",
-  },
-  {
-    title: "KYC Verification Module",
-    year: "2023",
-    desc: "Deployed automated KYC verification module reducing onboarding time by 40% and ensuring regulatory compliance across LATAM markets. Domain-driven design with clean event architecture.",
-    tags: ["DDD", "TypeORM", "Events", "Compliance", "NestJS"],
-    type: "Backend",
+    href: "https://docs.capa.fi",
   },
   {
     title: "AI Risk Assessment Platform",
@@ -48,20 +82,7 @@ export const projects: Project[] = [
     desc: "Developed ensemble ML models (XGBoost, Random Forest, Isolation Forest) achieving 60% reduction in false positives and 0.95+ AUC-ROC for fraud detection. Built FastAPI application with sub-200ms response times and SHAP-based explainable credit scoring.",
     tags: ["Python", "FastAPI", "XGBoost", "Redis", "Docker", "Prometheus"],
     type: "ML",
-  },
-  {
-    title: "LinkBridge — Enterprise Workflow Platform",
-    year: "2023",
-    desc: "Architected full-stack task management system with integrated PTO tracking and custom notification engine. WebSocket-based real-time collaboration enabling seamless team coordination for 50+ concurrent users.",
-    tags: ["React", "Node.js", "Firebase", "AWS S3", "WebSocket", "Zustand"],
-    type: "Full-Stack",
-  },
-  {
-    title: "AWS Production Infrastructure",
-    year: "2022–Present",
-    desc: "Owned production infrastructure on AWS (ECS, RDS, DocumentDB, ElastiCache, S3, Lambda) ensuring 99.9% uptime for financial transactions. Event-driven architecture handling +1M daily transaction volume with sub-second latency.",
-    tags: ["AWS", "ECS", "Terraform", "Docker", "Monitoring", "CI/CD"],
-    type: "DevOps",
+    href: "https://github.com/DHurtado714/ai-risk-assesment",
   },
 ];
 
@@ -113,19 +134,41 @@ export const expertiseData: ExpertiseItem[] = [
     icon: "❯_",
     title: "Backend Architecture",
     desc: "Designing and building scalable APIs, microservices, and event-driven systems. Clean domain boundaries with bulletproof reliability for financial transactions.",
-    tags: ["TypeScript", "NestJS", "Node.js", "Java", "Spring Boot", "PostgreSQL", "RabbitMQ"],
+    tags: [
+      "TypeScript",
+      "NestJS",
+      "Node.js",
+      "Java",
+      "Spring Boot",
+      "PostgreSQL",
+      "RabbitMQ",
+    ],
   },
   {
     icon: "${}",
     title: "Fintech & Payments",
     desc: "Cross-border payment engines, dynamic fee routing, KYC pipelines, and exchange rate management processing $300M+ across 4 regions.",
-    tags: ["Payments", "KYC", "Compliance", "FX Rates", "Idempotency", "Settlement"],
+    tags: [
+      "Payments",
+      "KYC",
+      "Compliance",
+      "FX Rates",
+      "Idempotency",
+      "Settlement",
+    ],
   },
   {
     icon: "≡·",
     title: "ML & Data Systems",
     desc: "Ensemble ML models for fraud detection and risk scoring. Explainable AI with SHAP, achieving 0.95+ AUC-ROC in production systems.",
-    tags: ["Python", "FastAPI", "XGBoost", "TensorFlow", "SHAP", "Risk Scoring"],
+    tags: [
+      "Python",
+      "FastAPI",
+      "XGBoost",
+      "TensorFlow",
+      "SHAP",
+      "Risk Scoring",
+    ],
   },
   {
     icon: "☁",
@@ -143,7 +186,7 @@ export const expertiseData: ExpertiseItem[] = [
     icon: "⚐",
     title: "System Design",
     desc: "Architectural thinking at every level — domain modeling, event-driven patterns, distributed transactions, and clean boundaries.",
-    tags: ["Event-Driven", "DDD", "Clean Arch", "Saga Pattern", "CQRS", "Testing"],
+    tags: ["Event-Driven", "DDD", "Clean Architecture", "Testing"],
   },
 ];
 
@@ -228,7 +271,15 @@ export interface ContactLink {
 }
 
 export const contactLinks: ContactLink[] = [
-  { label: "Email", href: "mailto:danielhurtado714@gmail.com", external: false },
+  {
+    label: "Email",
+    href: "mailto:danielhurtado714@gmail.com",
+    external: false,
+  },
   { label: "GitHub", href: "https://github.com/DHurtado714", external: true },
-  { label: "LinkedIn", href: "https://linkedin.com/in/daniel-hurtado", external: true },
+  {
+    label: "LinkedIn",
+    href: "https://linkedin.com/in/daniel-hurtado",
+    external: true,
+  },
 ];
