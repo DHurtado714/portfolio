@@ -1,0 +1,78 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import rehypePrettyCode from "rehype-pretty-code";
+import { getAllPosts, getPostBySlug } from "@/lib/content";
+import { mdxComponents } from "@/components/blog/mdx-components";
+import { ArticleLayout } from "@/components/blog/article-layout";
+import { Navigation } from "@/components/sections/navigation";
+import { Footer } from "@/components/sections/footer";
+
+type Params = { slug: string };
+
+export function generateStaticParams() {
+  return getAllPosts().map((post) => ({ slug: post.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<Params>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
+  if (!post) return {};
+
+  return {
+    title: post.title,
+    description: post.description,
+    keywords: post.tags,
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: "article",
+      publishedTime: post.date,
+      authors: ["Daniel Hurtado"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+    },
+  };
+}
+
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
+  if (!post || !post.published) notFound();
+
+  return (
+    <>
+      <Navigation />
+      <main>
+        <ArticleLayout post={post}>
+          <MDXRemote
+            source={post.content}
+            components={mdxComponents}
+            options={{
+              mdxOptions: {
+                rehypePlugins: [
+                  [
+                    rehypePrettyCode,
+                    { theme: "github-dark-default", keepBackground: false },
+                  ],
+                ],
+              },
+            }}
+          />
+        </ArticleLayout>
+      </main>
+      <Footer />
+    </>
+  );
+}

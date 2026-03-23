@@ -3,12 +3,12 @@ import { NavEntrance } from "@/components/motion/nav-entrance";
 import { NavLogo } from "@/components/motion/nav-logo";
 
 const navItems = [
-  { href: "#about", label: "About" },
-  { href: "#expertise", label: "Expertise" },
-  { href: "#work", label: "Work" },
-  { href: "#experience", label: "Experience" },
-  { href: "#beyond", label: "Beyond" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#about", label: "About" },
+  { href: "/#expertise", label: "Expertise" },
+  { href: "/#work", label: "Work" },
+  { href: "/#experience", label: "Experience" },
+  { href: "/blog", label: "Blog" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export function Navigation() {

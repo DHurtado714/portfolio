@@ -5,6 +5,7 @@ import { Expertise } from "@/components/sections/expertise";
 import { Work } from "@/components/sections/work";
 import { Experience } from "@/components/sections/experience";
 import { Beyond } from "@/components/sections/beyond";
+import { BlogSection } from "@/components/blog/blog-section";
 import { Contact } from "@/components/sections/contact";
 import { Footer } from "@/components/sections/footer";
 import {
@@ -84,6 +85,8 @@ export default function Home() {
         {/* <GitHubActivity /> */}
         <SectionDivider />
         <Beyond />
+        <SectionDivider />
+        <BlogSection />
         <SectionDivider />
         <Contact />
       </main>
