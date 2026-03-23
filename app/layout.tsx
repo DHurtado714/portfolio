@@ -21,7 +21,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://danielhurtado.dev"),
+  metadataBase: new URL("https://danih.dev"),
   title: {
     default: "Daniel \u2014 Software Engineer | Backend, Fintech & ML",
     template: "%s | Daniel Hurtado",

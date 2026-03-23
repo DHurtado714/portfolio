@@ -25,7 +25,7 @@ export function ArticleLayout({
     author: {
       "@type": "Person",
       name: "Daniel Hurtado",
-      url: "https://danielhurtado.dev",
+      url: "https://danih.dev",
     },
     publisher: {
       "@type": "Person",
