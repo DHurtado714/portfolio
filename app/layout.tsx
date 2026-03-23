@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, JetBrains_Mono, DM_Sans } from "next/font/google";
+import PostHogProvider from "@/components/posthog-provider";
 import "./globals.css";
 
 const syne = Syne({
@@ -88,7 +89,7 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${jetbrainsMono.variable} ${dmSans.variable} antialiased`}
       >
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>
   );
