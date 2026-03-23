@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
 import { getAllPosts, getPostBySlug } from "@/lib/content";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import { ArticleLayout } from "@/components/blog/article-layout";
@@ -61,7 +63,9 @@ export default async function BlogPostPage({
             components={mdxComponents}
             options={{
               mdxOptions: {
+                remarkPlugins: [remarkGfm],
                 rehypePlugins: [
+                  rehypeSlug,
                   [
                     rehypePrettyCode,
                     { theme: "github-dark-default", keepBackground: false },

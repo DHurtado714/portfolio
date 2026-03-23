@@ -1,6 +1,13 @@
 import type { MDXComponents } from "mdx/types";
+import { Callout } from "@/components/ui/callout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const mdxComponents: MDXComponents = {
+  Callout,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   h1: (props) => (
     <h1
       className="mb-6 mt-12 font-heading text-[36px] font-extrabold leading-[1.1] tracking-[-2px]"
