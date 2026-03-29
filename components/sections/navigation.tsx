@@ -34,7 +34,7 @@ export function Navigation() {
 
         <div className="hidden items-center gap-2 font-mono text-[11px] text-text-muted md:flex">
           <div className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot" />
-          <span>Available for opportunities</span>
+          <span>Shipping side projects</span>
         </div>
       </nav>
     </NavEntrance>

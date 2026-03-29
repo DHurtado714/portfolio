@@ -12,12 +12,12 @@ export interface Metric {
 
 export const metrics: Metric[] = [
   {
-    value: "$300M+",
-    numericTarget: 300,
-    prefix: "$",
-    suffix: "M+",
+    value: "15+",
+    numericTarget: 15,
+    prefix: "",
+    suffix: "+",
     decimals: 0,
-    label: "Transaction Volume",
+    label: "Countries Visited",
     green: true,
   },
   {
@@ -39,12 +39,12 @@ export const metrics: Metric[] = [
     green: false,
   },
   {
-    value: "99.9%",
-    numericTarget: 99.9,
+    value: "5+",
+    numericTarget: 5,
     prefix: "",
-    suffix: "%",
-    decimals: 1,
-    label: "System Uptime",
+    suffix: "+",
+    decimals: 0,
+    label: "Projects Shipped",
     green: true,
   },
 ];

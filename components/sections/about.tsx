@@ -27,9 +27,9 @@ export function About() {
                 Tec de Monterrey
               </strong>{" "}
               who sees the world as interconnected systems. Whether it&apos;s a
-              payment pipeline processing $300M+ or the way financial
-              infrastructure flows across borders &mdash; I&apos;m drawn to
-              understanding the architecture underneath.
+              payment pipeline or the way financial infrastructure flows across
+              15+ countries &mdash; I&apos;m drawn to understanding the
+              architecture underneath.
             </p>
             <p className="mb-4 text-base leading-[1.8] text-text-secondary">
               My work at{" "}
