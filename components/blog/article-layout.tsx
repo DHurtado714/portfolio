@@ -2,15 +2,22 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import type { BlogPost } from "@/lib/content";
+import { type Locale, translations } from "@/lib/i18n";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function ArticleLayout({
   post,
+  locale,
   children,
 }: {
   post: BlogPost;
+  locale: Locale;
   children: React.ReactNode;
 }) {
-  const formattedDate = new Date(post.date).toLocaleDateString("en-US", {
+  const t = translations[locale];
+  const dateLocale = locale === "es" ? "es-ES" : "en-US";
+
+  const formattedDate = new Date(post.date).toLocaleDateString(dateLocale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -41,13 +48,16 @@ export function ArticleLayout({
       />
 
       <article className="mx-auto max-w-[720px] px-5 pt-32 pb-20 md:px-0">
-        <Link
-          href="/blog"
-          className="group mb-12 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
-          Back to blog
-        </Link>
+        <div className="mb-12 flex items-center justify-between">
+          <Link
+            href={`/${locale}/blog`}
+            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
+            {t.backToBlog}
+          </Link>
+          <LanguageSwitcher locale={locale} />
+        </div>
 
         <header className="mb-12">
           <h1 className="mb-5 font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-[1.1] tracking-[-2px]">

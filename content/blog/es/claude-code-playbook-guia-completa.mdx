@@ -18,7 +18,7 @@ image: "/images/claude-code-playbook.png"
 
 # Claude Code Playbook: La guía completa para usarlo a diario
 
-**Claude Code** es el agente de desarrollo de Anthropic que corre directamente en tu terminal. A diferencia de los copilots tradicionales que solo autocompletan, Claude Code puede leer tu repositorio completo, ejecutar comandos, escribir y refactorizar archivos, tuar como un agente autónomo en tu codebase.
+**Claude Code** es el agente de desarrollo de Anthropic que corre directamente en tu terminal. A diferencia de los copilots tradicionales que solo autocompletan, Claude Code puede leer tu repositorio completo, ejecutar comandos, escribir y refactorizar archivos, actuar como un agente autónomo en tu codebase.
 
 Esta guía es un playbook práctico basado en uso real — no documentación oficial. Todo lo que está aquí lo uso en un stack de NestJS + AWS + TypeScript en producción.
 
@@ -65,7 +65,7 @@ El mayor error al empezar con Claude Code es tratarlo como un chatbot sin memori
 claude /init
 ```
 
-`/init` analiza tu repositorio y genera un `CLAUDE.md` de base. Siempre revisarlo y personalizarlo antes de cplo real para un proyecto NestJS + DDD
+`/init` analiza tu repositorio y genera un `CLAUDE.md` de base. Siempre revisarlo y personalizarlo antes de usarlo. Un ejemplo real para un proyecto NestJS + DDD:
 
 ```markdown
 ## Stack
@@ -98,7 +98,7 @@ claude /init
 
 ### Instrucciones inline con `#`
 
-Dentro de una sesión podés darle contexto específico usando `#`. Clrucción, no como comentario de código:
+Dentro de una sesión podés darle contexto específico usando `#`. Claude trata el texto prefijado con `#` como instrucción, no como comentario de código:
 
 ```
 # Estamos refactorizando el módulo ledger
@@ -132,7 +132,8 @@ Claude Code por defecto solo tiene acceso a filesystem, bash y git. Con **MCP (M
 # Sintaxis básica
 claude mcp add <nombre> <comando>
 
-# Ejemplos prácticoadd playwright npx @playwright/mcp@latest
+# Ejemplos prácticos
+claude mcp add playwright npx @playwright/mcp@latest
 claude mcp add postgres npx @modelcontextprotocol/server-postgres postgresql://...
 claude mcp add github npx @modelcontextprotocol/server-github
 
@@ -182,7 +183,7 @@ Con esto Claude puede:
 - Detectar N+1 con datos reales de staging
 
 <Callout type="warning">
-  Usar `--scope local` para servidores con credenciale— así no se commitean
+  Usar `--scope local` para servidores con credenciales — así no se commitean
   accidentalmente al repo.
 </Callout>
 
@@ -225,7 +226,7 @@ Los hooks son el feature más subestimado de Claude Code. Te permiten ejecutar c
 
 ### Hook 1: TypeScript validation post-write
 
-El más iás con TypeScript. Claude escribe un archivo → valida tipos → si hay errores los corrige en el mismo loop, sin que vos intervengas:
+El más impactante con TypeScript. Claude escribe un archivo → valida tipos → si hay errores los corrige en el mismo loop, sin que vos intervengas:
 
 ```json
 {
@@ -281,8 +282,7 @@ echo "⚠️ Possible duplicate: '$BASENAME' already exists in:"
   echo "$MATCHES"
 exit 1
 fi
-
-````
+```
   </TabsContent>
 </Tabs>
 
@@ -304,7 +304,7 @@ fi
       },
       {
         "matcher": "edit_file",
-        "com": "bash -c 'echo \"$TOOL_INPUT_PATH\" | grep -q \"generated\\|dist\\|\\.d\\.ts\" && exit 1 || exit 0'",
+        "command": "bash -c 'echo \"$TOOL_INPUT_PATH\" | grep -q \"generated\\|dist\\|\\.d\\.ts\" && exit 1 || exit 0'",
         "on_failure": "block"
       }
     ],
@@ -327,7 +327,7 @@ fi
     ]
   }
 }
-````
+```
 
 <Callout type="tip">
   **La triada ganadora:** `tsc --noEmit` + `check-duplicates` + `jest
@@ -339,7 +339,7 @@ fi
 
 ## GitHub Workflow — Claude como agente en tu repo
 
-Con `claude-code-action` podés convertir a Claude en un agente que vive dentro de tu reorio de GitHub, activándose por eventos de PRs y issues.
+Con `claude-code-action` podés convertir a Claude en un agente que vive dentro de tu repositorio de GitHub, activándose por eventos de PRs y issues.
 
 ### Setup básico
 
@@ -374,7 +374,7 @@ Con esto, cualquier comentario que mencione `@claude` en un PR o issue activa el
 
 ### El caso de uso con Playwright: QA automatizado en PRs
 
-El flujo más poderoso que mostraron es combinar el GitHub Action con el MCP server de Playwright para tener un QA agent que corre automáticamente en cada PR:
+El flujo más poderoso es combinar el GitHub Action con el MCP server de Playwright para tener un QA agent que corre automáticamente en cada PR:
 
 1. Dev hace PR con cambios en un flow de pago
 2. Reviewer comenta: `@claude verify the checkout flow on stg`
@@ -482,7 +482,7 @@ claude -p "$(cat prompt.txt)" --output-format json
 
 ---
 
-## Resumen — el setle
+## Resumen — el setup mínimo viable
 
 Si empezás desde cero, este es el orden de prioridad:
 

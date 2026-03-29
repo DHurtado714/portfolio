@@ -1,8 +1,21 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/content";
+import { LOCALES } from "@/lib/i18n";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getAllPosts();
+  const postEntries = LOCALES.flatMap((locale) =>
+    getAllPosts(locale).map((post) => ({
+      url: `https://danih.dev/${locale}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+      alternates: {
+        languages: Object.fromEntries(
+          LOCALES.map((l) => [l, `https://danih.dev/${l}/blog/${post.slug}`])
+        ),
+      },
+    }))
+  );
 
   return [
     {
@@ -11,17 +24,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
-    {
-      url: "https://danih.dev/blog",
+    ...LOCALES.map((locale) => ({
+      url: `https://danih.dev/${locale}/blog`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "weekly" as const,
       priority: 0.8,
-    },
-    ...posts.map((post) => ({
-      url: `https://danih.dev/blog/${post.slug}`,
-      lastModified: new Date(post.date),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
+      alternates: {
+        languages: Object.fromEntries(
+          LOCALES.map((l) => [l, `https://danih.dev/${l}/blog`])
+        ),
+      },
     })),
+    ...postEntries,
   ];
 }

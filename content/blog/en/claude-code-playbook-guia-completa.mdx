@@ -1,0 +1,495 @@
+---
+title: "Claude Code Playbook: The Complete Guide to Using It Every Day"
+description: "A practical playbook with everything you need to use Claude Code as your development co-pilot: CLAUDE.md, MCP servers, hooks, GitHub Actions, and daily workflows. Updated 2026."
+date: "2026-03-23"
+author: "Daniel"
+tags:
+  [
+    "claude-code",
+    "ai",
+    "developer-tools",
+    "productivity",
+    "mcp",
+    "github-actions",
+  ]
+published: true
+image: "/images/claude-code-playbook.png"
+---
+
+# Claude Code Playbook: The Complete Guide to Using It Every Day
+
+**Claude Code** is Anthropic's development agent that runs directly in your terminal. Unlike traditional copilots that only autocomplete, Claude Code can read your entire repository, execute commands, write and refactor files, and act as an autonomous agent in your codebase.
+
+This guide is a practical playbook based on real usage — not official documentation. Everything here is what I use in a NestJS + AWS + TypeScript stack in production.
+
+<Callout type="info">
+  **TL;DR for the impatient:** 80% of Claude Code's value comes from three
+  things: a good `CLAUDE.md`, hooks that validate your code automatically, and
+  MCP servers that give it real context about your infrastructure.
+</Callout>
+
+---
+
+## Table of Contents
+
+1. [Memory System — CLAUDE.md](#memory-system--claudemd)
+2. [MCP Servers — Expanding Capabilities](#mcp-servers--expanding-capabilities)
+3. [Hooks — Automation and Code Quality](#hooks--automation-and-code-quality)
+4. [GitHub Workflow — Claude as an Agent in Your Repo](#github-workflow--claude-as-an-agent-in-your-repo)
+5. [Daily Driver Flow — How to Use It Every Day](#daily-driver-flow--how-to-use-it-every-day)
+
+---
+
+## Memory System — CLAUDE.md
+
+The biggest mistake when starting with Claude Code is treating it like a stateless chatbot. Claude Code has a Markdown-based memory system that defines **how it behaves in each context**.
+
+### The Three Levels of CLAUDE.md
+
+| File                  | Scope                                | Committed |
+| --------------------- | ------------------------------------ | --------- |
+| `CLAUDE.md`           | Project — shared with the team       | ✅ Yes    |
+| `CLAUDE.local.md`     | Project — yours only                 | ❌ No     |
+| `~/.claude/CLAUDE.md` | Global — all your projects           | ❌ No     |
+
+**When to use each?**
+
+- **`CLAUDE.md`**: Team conventions, project architecture, existing modules, mandatory patterns. Everything a new dev would need to know.
+- **`CLAUDE.local.md`**: Your personal preferences, local paths, instructions you don't want your teammates to see.
+- **`~/.claude/CLAUDE.md`**: Rules that apply to all your projects — e.g., never use `any` in TypeScript, always conventional commits, always DDD.
+
+### Generating the Initial CLAUDE.md
+
+```bash
+# Inside your repo
+claude /init
+```
+
+`/init` analyzes your repository and generates a base `CLAUDE.md`. Always review and customize it before using it for real. A real example for a NestJS + DDD project:
+
+```markdown
+## Stack
+
+- NestJS + TypeScript (strict, no `any`)
+- DDD + Clean Architecture — domain / application / infrastructure
+- AWS ECS Fargate + Terraform
+- PostgreSQL + TypeORM
+
+## Conventions
+
+- Conventional commits: feat/fix/chore/refactor/docs
+- No business logic in controllers or repositories
+- Each module has its own bounded context
+- Event-driven: use outbox pattern for cross-module events
+
+## Active Modules
+
+- `ledger` — double-entry accounting
+- `user` — customer registration
+- `notification` — sending messages, emails, or events
+
+## Before Writing Code
+
+1. Check if a similar implementation already exists in the repo
+2. Respect the module structure above
+3. Run `tsc --noEmit` before finishing
+4. Tests are mandatory for domain logic
+```
+
+### Inline Instructions with `#`
+
+During a session you can give it specific context using `#`. Claude treats text prefixed with `#` as an instruction, not a code comment:
+
+```
+# We are refactoring the ledger module
+# Maintain compatibility with the existing API
+# Do not touch already-committed migration files
+```
+
+### Essential Session Commands
+
+```bash
+/init      # Generates CLAUDE.md by analyzing the repo
+/compact   # Summarizes the conversation to free up context (crucial in long sessions)
+/commands  # Lists your custom slash commands
+```
+
+<Callout type="tip">
+  **Pro tip:** When a session gets slow or Claude starts "forgetting" previous
+  context, `/compact` is your best friend. It summarizes everything without
+  losing the thread of the current task.
+</Callout>
+
+---
+
+## MCP Servers — Expanding Capabilities
+
+By default, Claude Code only has access to the filesystem, bash, and git. With **MCP (Model Context Protocol) servers** you can connect external tools and turn it into a much more powerful agent.
+
+### Adding an MCP Server
+
+```bash
+# Basic syntax
+claude mcp add <name> <command>
+
+# Practical examples
+claude mcp add playwright npx @playwright/mcp@latest
+claude mcp add postgres npx @modelcontextprotocol/server-postgres postgresql://...
+claude mcp add github npx @modelcontextprotocol/server-github
+
+# Management
+claude mcp list
+claude mcp get <name>
+claude mcp remove <name>
+```
+
+### Three Configuration Scopes
+
+```bash
+claude mcp add --scope local    # This project only (not committed)
+claude mcp add --scope user     # All your projects
+claude mcp add --scope project  # Committed in .mcp.json — the whole team has it
+```
+
+`--scope project` is the equivalent of `CLAUDE.md` but for tools. You commit `.mcp.json` and everyone on the team automatically has the same MCP servers available.
+
+### Most Useful MCP Servers for Developers
+
+| Server | Installation | Use Case |
+|--------|--------------|----------|
+| **Playwright** | `npx @playwright/mcp@latest` | E2E testing, validating flows, scraping |
+| **PostgreSQL** | `npx @modelcontextprotocol/server-postgres` | Direct DB queries, inspect schema |
+| **GitHub** | `npx @modelcontextprotocol/server-github` | PRs, issues, repos from Claude |
+| **Fetch** | `npx @modelcontextprotocol/server-fetch` | HTTP requests, calling external APIs |
+| **Filesystem** | `npx @modelcontextprotocol/server-filesystem` | Access to directories outside the project |
+| **AWS** | `npx @modelcontextprotocol/server-aws` | ECS, S3, CloudWatch from the session |
+
+### Concrete Example: Connected Staging DB
+
+The PostgreSQL MCP is particularly powerful. With the staging DB connected, Claude has real schema context while coding:
+
+```bash
+claude mcp add postgres \
+  npx @modelcontextprotocol/server-postgres \
+  postgresql://user:pass@staging-db:5432/myapp \
+  --scope local
+```
+
+With this, Claude can:
+
+- Inspect tables and relationships without you copy-pasting the schema
+- Validate queries before writing them
+- Suggest indexes based on the real structure
+- Detect N+1 with real staging data
+
+<Callout type="warning">
+  Use `--scope local` for servers with credentials — so they are not
+  accidentally committed to the repo.
+</Callout>
+
+---
+
+## Hooks — Automation and Code Quality
+
+Hooks are the most underrated feature of Claude Code. They let you run commands automatically **before or after** Claude performs actions, creating a self-correction loop without manual intervention.
+
+### Basic Structure
+
+```json
+// .claude/settings.json
+{
+  "hooks": {
+    "pre_tool_use": [
+      {
+        "matcher": "read_file",
+        "command": "...",
+        "on_failure": "block"
+      }
+    ],
+    "post_tool_use": [
+      {
+        "matcher": "write_file|edit_file",
+        "command": "...",
+        "on_failure": "warn"
+      }
+    ]
+  }
+}
+```
+
+**Available matchers:** `write_file`, `edit_file`, `read_file`, `str_replace`, `bash`
+
+**`on_failure` modes:**
+
+- `warn` — Claude sees the output and decides whether to continue. For suggestions.
+- `block` — Claude cannot continue until it resolves the issue. For hard rules.
+
+### Hook 1: TypeScript Validation Post-Write
+
+The most impactful one with TypeScript. Claude writes a file → validates types → if there are errors it fixes them in the same loop, without you intervening:
+
+```json
+{
+  "matcher": "write_file|edit_file|str_replace",
+  "command": "npx tsc --noEmit",
+  "on_failure": "warn"
+}
+```
+
+### Hook 2: Block Sensitive Files
+
+Hard block so Claude cannot read `.env`, private keys, or files with `secrets` in the path:
+
+```json
+{
+  "matcher": "read_file",
+  "command": "bash -c 'echo \"$TOOL_INPUT\" | grep -qE \"\\.env|\\.pem|\\.key|secrets\" && exit 1 || exit 0'",
+  "on_failure": "block"
+}
+```
+
+### Hook 3: Anti-Duplication
+
+The most powerful hook for keeping code clean. Before creating a new file, it checks if something with that name already exists in the project. Claude investigates and decides whether to reuse instead of duplicate:
+
+<Tabs defaultValue="hook">
+  <TabsList>
+    <TabsTrigger value="hook">settings.json</TabsTrigger>
+    <TabsTrigger value="script">check-duplicates.sh</TabsTrigger>
+  </TabsList>
+  <TabsContent value="hook">
+```json
+{
+  "matcher": "write_file",
+  "command": "bash scripts/check-duplicates.sh $TOOL_INPUT_PATH",
+  "on_failure": "warn"
+}
+```
+  </TabsContent>
+  <TabsContent value="script">
+```bash
+#!/bin/bash
+# scripts/check-duplicates.sh
+FILE=$1
+BASENAME=$(basename "$FILE" .ts)
+
+MATCHES=$(grep -r \
+ "class $BASENAME\|function $BASENAME\|const $BASENAME" \
+ src/ --include="\*.ts" -l 2>/dev/null)
+
+if [ -n "$MATCHES" ]; then
+  echo "⚠️ Possible duplicate: '$BASENAME' already exists in:"
+  echo "$MATCHES"
+  exit 1
+fi
+```
+  </TabsContent>
+</Tabs>
+
+### Recommended Full Hook Stack
+
+```json
+{
+  "hooks": {
+    "pre_tool_use": [
+      {
+        "matcher": "read_file",
+        "command": "bash -c 'echo \"$TOOL_INPUT\" | grep -qE \"\\.env|\\.pem|\\.key|secrets\" && exit 1 || exit 0'",
+        "on_failure": "block"
+      },
+      {
+        "matcher": "write_file",
+        "command": "bash scripts/check-duplicates.sh $TOOL_INPUT_PATH",
+        "on_failure": "warn"
+      },
+      {
+        "matcher": "edit_file",
+        "command": "bash -c 'echo \"$TOOL_INPUT_PATH\" | grep -q \"generated\\|dist\\|\\.d\\.ts\" && exit 1 || exit 0'",
+        "on_failure": "block"
+      }
+    ],
+    "post_tool_use": [
+      {
+        "matcher": "write_file|edit_file|str_replace",
+        "command": "npx tsc --noEmit",
+        "on_failure": "warn"
+      },
+      {
+        "matcher": "edit_file",
+        "command": "npx eslint $TOOL_INPUT_PATH --fix",
+        "on_failure": "warn"
+      },
+      {
+        "matcher": "write_file",
+        "command": "npx jest --findRelatedTests $TOOL_INPUT_PATH --passWithNoTests",
+        "on_failure": "warn"
+      }
+    ]
+  }
+}
+```
+
+<Callout type="tip">
+  **The winning trio:** `tsc --noEmit` + `check-duplicates` + `jest
+  --findRelatedTests`. With these three hooks Claude cannot leave the project in
+  a broken state — it self-corrects in the same loop.
+</Callout>
+
+---
+
+## GitHub Workflow — Claude as an Agent in Your Repo
+
+With `claude-code-action` you can turn Claude into an agent that lives inside your GitHub repository, triggered by PR and issue events.
+
+### Basic Setup
+
+```yaml
+# .github/workflows/claude.yml
+name: Claude Code Agent
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  claude:
+    if: contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: $&#123;&#123; secrets.ANTHROPIC_API_KEY &#125;&#125;
+```
+
+With this, any comment mentioning `@claude` in a PR or issue activates the agent.
+
+### The Playwright Use Case: Automated QA on PRs
+
+The most powerful flow is combining the GitHub Action with the Playwright MCP server to have a QA agent that runs automatically on every PR:
+
+1. Dev opens a PR with changes to a payment flow
+2. Reviewer comments: `@claude verify the checkout flow on stg`
+3. Claude reads the PR diff
+4. Spins up Playwright and navigates the staging environment
+5. Validates the end-to-end flow
+6. Responds in the PR with the result + screenshots if something fails
+
+### Most Useful Trigger Patterns
+
+| Command                        | What Claude Does                                |
+| ------------------------------ | ----------------------------------------------- |
+| `@claude review this PR`       | Code review against CLAUDE.md conventions       |
+| `@claude fix failing tests`    | Analyzes broken tests and generates the fix     |
+| `@claude verify checkout flow` | Playwright validates the flow in staging        |
+| `@claude update the docs`      | Generates/updates docs based on the diff        |
+| `@claude check for duplicates` | Finds code similar to what was introduced in PR |
+| `@claude generate changelog`   | Generates changelog between PR base and head    |
+
+<Callout type="info">
+  The repository's `CLAUDE.md` also applies when Claude runs in GitHub
+  Actions. If your conventions are well-defined there, the automatic code
+  review will be much more precise.
+</Callout>
+
+---
+
+## Daily Driver Flow — How to Use It Every Day
+
+### The Daily Flow
+
+```
+Start   →  /init for new projects → review CLAUDE.md
+Coding  →  Use # to give context for the current task in the session
+Review  →  "Review this for DDD violations and suggest improvements"
+Commit  →  claude commit → Claude generates conventional commit from diff
+Close   →  /compact to leave summarized context
+```
+
+### High-Value Prompts
+
+**Architecture and design:**
+
+```
+Think step by step before writing any code.
+Design this module using DDD. Consider the tradeoffs before deciding.
+```
+
+**Debug:**
+
+```
+Explain why this test fails, then fix it without changing the test logic.
+```
+
+**Refactor:**
+
+```
+Refactor this without changing behavior. Check for duplicates first.
+```
+
+**Code review:**
+
+```
+Review this diff for N+1 queries, missing error handling, and DDD violations.
+```
+
+**Documentation:**
+
+```
+Generate JSDoc for all public methods in this file. Include @throws and @example.
+```
+
+**Migrations:**
+
+```
+Write the migration. Verify it's reversible, then run tsc --noEmit.
+```
+
+### Extended Thinking — When to Use It
+
+For complex tasks (architecture design, difficult debugging, tradeoff decisions), forcing deep reasoning drastically improves quality:
+
+```
+"Think before responding: what are the risks of this implementation?"
+"Consider multiple approaches before writing any code."
+"What could go wrong with this design? Then proceed with the best option."
+```
+
+Not necessary for mechanical tasks (generating a DTO, writing a simple test). Use it when the problem genuinely requires analysis.
+
+### Headless / CI Mode
+
+`claude -p` runs Claude without an interactive interface — perfect for pipelines, automation scripts, and n8n workflows:
+
+```bash
+# Direct pipe from stdin
+claude -p "review this diff for security issues" < git.diff
+
+# Generate changelog automatically
+claude -p "summarize changes in CHANGELOG format" < release.diff >> CHANGELOG.md
+
+# As a subprocess in n8n or scripts
+claude -p "$(cat prompt.txt)" --output-format json
+```
+
+---
+
+## Summary — The Minimum Viable Setup
+
+If you're starting from scratch, this is the priority order:
+
+1. **`~/.claude/CLAUDE.md`** — your global rules (no `any`, conventional commits, your favorite stack)
+2. **`CLAUDE.md` in each repo** — architecture, modules, team conventions
+3. **Hooks: tsc + duplicates** — the two that most impact quality
+4. **MCP: staging postgres** — real context without copy/paste
+5. **GitHub Action** — when you want to automate reviews and QA
+
+The full setup takes less than an hour, and the productivity difference is immediate.

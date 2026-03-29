@@ -3,16 +3,24 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Calendar } from "lucide-react";
 import type { BlogPost } from "@/lib/content";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
 
-export function BlogCard({ post }: { post: BlogPost }) {
-  const formattedDate = new Date(post.date).toLocaleDateString("en-US", {
+export function BlogCard({
+  post,
+  locale = DEFAULT_LOCALE,
+}: {
+  post: BlogPost;
+  locale?: string;
+}) {
+  const dateLocale = locale === "es" ? "es-ES" : "en-US";
+  const formattedDate = new Date(post.date).toLocaleDateString(dateLocale, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
 
   return (
-    <Link href={`/blog/${post.slug}`}>
+    <Link href={`/${locale}/blog/${post.slug}`}>
       <Card className="group relative cursor-pointer overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 shadow-none transition-all duration-400 hover:translate-x-1 hover:border-border-hover">
         <span className="absolute top-0 left-0 h-full w-[3px] origin-top scale-y-0 bg-green transition-transform duration-400 group-hover:scale-y-100" />
 

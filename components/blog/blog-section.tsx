@@ -4,7 +4,7 @@ import { BlogCard } from "./blog-card";
 import { SectionHeader } from "@/components/sections/section-header";
 
 export function BlogSection() {
-  const posts = getAllPosts().slice(0, 3);
+  const posts = getAllPosts("en").slice(0, 3);
 
   if (posts.length === 0) return null;
 
@@ -25,7 +25,7 @@ export function BlogSection() {
 
       <div className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
-          <BlogCard key={post.slug} post={post} />
+          <BlogCard key={post.slug} post={post} locale="en" />
         ))}
       </div>
 
