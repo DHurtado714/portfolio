@@ -25,19 +25,52 @@ export function ArticleLayout({
 
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.description,
-    datePublished: post.date,
-    author: {
-      "@type": "Person",
-      name: "Daniel Hurtado",
-      url: "https://danih.dev",
-    },
-    publisher: {
-      "@type": "Person",
-      name: "Daniel Hurtado",
-    },
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.description,
+        datePublished: post.date,
+        dateModified: post.dateModified ?? post.date,
+        ...(post.image && { image: `https://danih.dev${post.image}` }),
+        inLanguage: locale,
+        keywords: post.tags,
+        wordCount: post.wordCount,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": `https://danih.dev/${locale}/blog/${post.slug}`,
+        },
+        author: { "@id": "https://danih.dev/#person" },
+        publisher: {
+          "@type": "Person",
+          "@id": "https://danih.dev/#person",
+          name: "Daniel Hurtado",
+          url: "https://danih.dev",
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://danih.dev",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Blog",
+            item: `https://danih.dev/${locale}/blog`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: post.title,
+          },
+        ],
+      },
+    ],
   };
 
   return (

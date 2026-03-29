@@ -34,12 +34,23 @@ export async function generateMetadata({
     title: post.title,
     description: post.description,
     keywords: post.tags,
+    alternates: {
+      canonical: `https://danih.dev/${locale}/blog/${slug}`,
+      languages: {
+        en: `https://danih.dev/en/blog/${slug}`,
+        es: `https://danih.dev/es/blog/${slug}`,
+      },
+    },
     openGraph: {
       title: post.title,
       description: post.description,
       type: "article",
+      url: `https://danih.dev/${locale}/blog/${slug}`,
+      locale: locale === "es" ? "es_ES" : "en_US",
       publishedTime: post.date,
+      ...(post.dateModified && { modifiedTime: post.dateModified }),
       authors: ["Daniel Hurtado"],
+      tags: post.tags,
     },
     twitter: {
       card: "summary_large_image",

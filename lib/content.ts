@@ -11,9 +11,12 @@ export interface BlogPost {
   title: string;
   description: string;
   date: string;
+  dateModified?: string;
   tags: string[];
   published: boolean;
   readingTime: string;
+  wordCount: number;
+  image?: string;
   content: string;
 }
 
@@ -34,7 +37,7 @@ export function getAllPosts(locale: string = DEFAULT_LOCALE): BlogPost[] {
 
 export function getPostBySlug(
   slug: string,
-  locale: string = DEFAULT_LOCALE
+  locale: string = DEFAULT_LOCALE,
 ): BlogPost | null {
   const filePath = path.join(BLOG_BASE_DIR, locale, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
@@ -48,9 +51,12 @@ export function getPostBySlug(
     title: data.title ?? "",
     description: data.description ?? "",
     date: data.date ?? "",
+    dateModified: data.dateModified ?? undefined,
     tags: data.tags ?? [],
     published: data.published ?? false,
     readingTime: stats.text,
+    wordCount: stats.words,
+    image: data.image ?? undefined,
     content,
   };
 }

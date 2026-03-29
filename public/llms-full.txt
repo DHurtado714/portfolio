@@ -1,0 +1,131 @@
+# Daniel Hurtado — Software Engineer | Backend, Fintech & ML
+
+> Software Engineer specializing in Backend, Fintech & ML. Building cross-border payment infrastructure processing $300M+ at Capa.fi. Based in Colombia, working remotely across Latin America, USA, and Europe.
+
+## About
+
+Daniel Hurtado is a Colombian software engineer based in Colombia, specializing in backend architecture, fintech systems, and machine learning. He currently works at Capa.fi building cross-border payment infrastructure that processes over $300 million USD in transaction volume across Mexico, USA, Europe, and Dominican Republic.
+
+Daniel is a systems thinker who approaches engineering problems with an architectural mindset — designing clean domain boundaries, event-driven patterns, and distributed transaction systems for financial applications. He combines deep backend expertise with machine learning capabilities, particularly in fraud detection and risk scoring for fintech applications.
+
+He holds a BS in Computer Science and Technology from the Monterrey Institute of Technology and Higher Education (ITESM) with a GPA of 96.2 out of 100. He is AWS certified and has completed the Alchemy Ethereum Developer Bootcamp.
+
+## Core Expertise — Backend Architecture
+
+Designing and building scalable APIs, microservices, and event-driven systems with clean domain boundaries and bulletproof reliability for financial transactions.
+
+Technologies: TypeScript, NestJS, Node.js, Java, Spring Boot, PostgreSQL, RabbitMQ
+
+Key capabilities:
+- Event-driven architecture with message queues (RabbitMQ, SQS/SNS)
+- Domain-Driven Design (DDD) and Clean Architecture patterns
+- Microservices with well-defined bounded contexts
+- API design (REST, WebSocket) with idempotency guarantees
+- Database design and optimization for high-throughput financial systems
+
+## Core Expertise — Fintech & Payments
+
+Cross-border payment engines, dynamic fee routing, KYC pipelines, and exchange rate management processing $300M+ across 4 regions.
+
+Technologies: Payment processing, KYC/AML compliance, FX rate aggregation, settlement systems, idempotent transaction processing
+
+Key capabilities:
+- Multi-provider payment routing with dynamic fee calculation
+- Real-time FX engine with multi-provider rate aggregation
+- KYC/AML pipeline design and compliance integration
+- Settlement and reconciliation systems
+- Idempotent transaction processing for exactly-once payment guarantees
+- Cross-border regulatory compliance across Mexico, USA, Europe, and Dominican Republic
+
+## Core Expertise — ML & Data Systems
+
+Ensemble ML models for fraud detection and risk scoring with explainable AI, achieving 0.95+ AUC-ROC in production systems.
+
+Technologies: Python, FastAPI, XGBoost, Random Forest, Isolation Forest, TensorFlow, SHAP, Redis, Docker, Prometheus
+
+Key capabilities:
+- Ensemble models (XGBoost, Random Forest, Isolation Forest) for fraud detection
+- SHAP-based explainable credit scoring for regulatory compliance
+- Real-time ML inference with sub-200ms response times via FastAPI
+- Feature engineering for financial transaction data
+- Model monitoring with Prometheus and Grafana
+
+## Core Expertise — Cloud & DevOps
+
+AWS production infrastructure for fintech — ECS, RDS, ElastiCache, Lambda. Infrastructure as code, monitoring, and 99.9% uptime.
+
+Technologies: AWS (ECS, RDS, ElastiCache, Lambda, S3, SQS, SNS), Docker, Terraform, Prometheus, Grafana, CI/CD
+
+## Core Expertise — Full-Stack Capability
+
+Backend-first, but fully capable across the stack. Building complete products from database to UI when needed.
+
+Technologies: React, Next.js, Firebase, REST APIs, WebSocket, Zustand
+
+## Core Expertise — System Design
+
+Architectural thinking at every level — domain modeling, event-driven patterns, distributed transactions, and clean boundaries.
+
+Technologies: Event-Driven Architecture, DDD, Clean Architecture, CQRS, Testing strategies
+
+## Key Project — Cross-Border Payment Infrastructure (2022–Present)
+
+Built and maintained cross-border payment systems processing $300M+ USD in transaction volume across Mexico, USA, Europe, and Dominican Republic. Designed dynamic fee calculation and routing systems across multiple providers, optimizing transaction costs by 15%.
+
+Key metrics:
+- $300M+ total transaction volume processed
+- 4 regions served (Mexico, USA, Europe, Dominican Republic)
+- 15% reduction in transaction costs through dynamic routing
+- 99.9% system uptime
+- Event-driven architecture with NestJS, TypeScript, AWS, PostgreSQL, RabbitMQ
+
+## Key Project — AI Risk Assessment Platform (2024)
+
+Developed ensemble ML models (XGBoost, Random Forest, Isolation Forest) achieving 60% reduction in false positives and 0.95+ AUC-ROC for fraud detection. Built FastAPI application with sub-200ms response times and SHAP-based explainable credit scoring.
+
+Key metrics:
+- 60% reduction in fraud false positives
+- 0.95+ AUC-ROC for fraud detection
+- Sub-200ms inference response times
+- SHAP-based model explainability for regulatory compliance
+- Built with Python, FastAPI, XGBoost, Redis, Docker, Prometheus
+
+## Professional Experience
+
+### Software Engineer — Capa.fi (2022–Present)
+Building core payment infrastructure processing $300M+ across Mexico, USA, Europe, and Dominican Republic. Owning AWS production infrastructure, designing event-driven systems, and optimizing payment routing across multiple providers.
+
+### Full-Stack Developer — Zeitgeist Consulting / LinkBridge (2023)
+Architected enterprise workflow platform with real-time collaboration, PTO tracking, and multi-cloud infrastructure across Firebase and AWS. Achieved 40% faster development cycles using modern React frameworks.
+
+## Education
+
+BS Computer Science and Technology
+Monterrey Institute of Technology and Higher Education (ITESM)
+2021–2025 | GPA: 96.2/100
+
+## Key Metrics
+
+- $300M+ Transaction Volume Processed
+- 4 Regions (Mexico, USA, Europe, Dominican Republic)
+- 3+ Years of Professional Experience
+- 99.9% System Uptime
+- 60% Reduction in Fraud False Positives
+- 0.95+ AUC-ROC in Production ML Models
+
+## Technical Skills (Complete List)
+
+Backend: TypeScript, NestJS, Node.js, Java, Spring Boot, PostgreSQL, RabbitMQ
+ML/AI: Python, FastAPI, XGBoost, Random Forest, Isolation Forest, TensorFlow, SHAP
+Cloud: AWS (ECS, RDS, ElastiCache, Lambda, S3, SQS, SNS), Docker, Terraform
+Monitoring: Prometheus, Grafana, CI/CD pipelines
+Frontend: React, Next.js, Firebase, WebSocket, Zustand
+Practices: Event-Driven Architecture, DDD, Clean Architecture, CQRS, Testing
+
+## Contact & Links
+
+- Website: https://danih.dev
+- Blog: https://danih.dev/en/blog
+- GitHub: https://github.com/DHurtado714
+- LinkedIn: https://linkedin.com/in/daniel-hurtado
+- Email: danielhurtado714@gmail.com

@@ -11,10 +11,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
       alternates: {
         languages: Object.fromEntries(
-          LOCALES.map((l) => [l, `https://danih.dev/${l}/blog/${post.slug}`])
+          LOCALES.map((l) => [l, `https://danih.dev/${l}/blog/${post.slug}`]),
         ),
       },
-    }))
+    })),
   );
 
   return [
@@ -24,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
+    {
+      url: "https://danih.dev/llms.txt",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
     ...LOCALES.map((locale) => ({
       url: `https://danih.dev/${locale}/blog`,
       lastModified: new Date(),
@@ -31,7 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       alternates: {
         languages: Object.fromEntries(
-          LOCALES.map((l) => [l, `https://danih.dev/${l}/blog`])
+          LOCALES.map((l) => [l, `https://danih.dev/${l}/blog`]),
         ),
       },
     })),

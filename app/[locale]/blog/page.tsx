@@ -29,10 +29,19 @@ export async function generateMetadata({
       "fintech engineering",
       "technical blog",
     ],
+    alternates: {
+      canonical: `https://danih.dev/${locale}/blog`,
+      languages: {
+        en: "https://danih.dev/en/blog",
+        es: "https://danih.dev/es/blog",
+      },
+    },
     openGraph: {
       title: `${t.blogTitle} | Daniel Hurtado`,
       description: t.blogDescription,
       type: "website",
+      url: `https://danih.dev/${locale}/blog`,
+      locale: locale === "es" ? "es_ES" : "en_US",
     },
   };
 }

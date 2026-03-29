@@ -52,9 +52,13 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Daniel Hurtado" }],
   creator: "Daniel Hurtado",
+  alternates: {
+    canonical: "https://danih.dev",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
+    url: "https://danih.dev",
     title: "Daniel \u2014 Software Engineer | Backend, Fintech & ML",
     description:
       "Building cross-border payment infrastructure processing $300M+. Backend architecture, fintech systems, and ML.",
