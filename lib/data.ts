@@ -84,6 +84,14 @@ export const projects: Project[] = [
     type: "ML",
     href: "https://github.com/DHurtado714/ai-risk-assesment",
   },
+  {
+    title: "herbID",
+    year: "2025",
+    desc: "Full-stack herb classifier that distinguishes cilantro from parsley using a CNN trained on 50k+ herb images — 97.2% accuracy with sub-second inference. Covers the full ML product lifecycle: data collection → model training → FastAPI REST backend → Next.js frontend. Four upload methods: drag & drop, file browse, paste, and camera.",
+    tags: ["TensorFlow", "FastAPI", "Next.js", "Python", "AWS S3", "TanStack Query"],
+    type: "ML · Full-Stack",
+    href: "https://github.com/DHurtado714/Cilantro-Perejil",
+  },
 ];
 
 // ─── Timeline (Experience section) ───────────────────────────────────────────
