@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { motion, type Variants } from "framer-motion";
 
 const containerVariants: Variants = {
@@ -30,11 +30,18 @@ export function HeroEntrance({
   children: ReactNode;
   className?: string;
 }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 900);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
-      animate="visible"
+      animate={ready ? "visible" : "hidden"}
       className={className}
     >
       {children}

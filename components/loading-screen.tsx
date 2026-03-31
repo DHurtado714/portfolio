@@ -8,8 +8,21 @@ export function LoadingScreen() {
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), shouldReduceMotion ? 300 : 1500);
-    return () => clearTimeout(timer);
+    let t: ReturnType<typeof setTimeout>;
+
+    const dismiss = () => {
+      t = setTimeout(() => setIsLoading(false), shouldReduceMotion ? 0 : 300);
+    };
+
+    if (document.readyState === "complete") {
+      dismiss();
+    } else {
+      window.addEventListener("load", dismiss, { once: true });
+      // Fallback: never hold longer than 800ms after mount
+      t = setTimeout(() => setIsLoading(false), shouldReduceMotion ? 300 : 800);
+    }
+
+    return () => clearTimeout(t);
   }, [shouldReduceMotion]);
 
   return (

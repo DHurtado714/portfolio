@@ -7,20 +7,28 @@ export function CursorGlow() {
     const glow = document.getElementById("cursorGlow");
     if (!glow) return;
 
+    let rafId: number;
     const onMouseMove = (e: MouseEvent) => {
-      glow.style.left = e.clientX + "px";
-      glow.style.top = e.clientY + "px";
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        glow.style.transform = `translate(${e.clientX - 150}px, ${e.clientY - 150}px)`;
+      });
     };
 
     document.addEventListener("mousemove", onMouseMove);
-    return () => document.removeEventListener("mousemove", onMouseMove);
+    return () => {
+      cancelAnimationFrame(rafId);
+      document.removeEventListener("mousemove", onMouseMove);
+    };
   }, []);
 
   return (
     <div
       id="cursorGlow"
-      className="pointer-events-none fixed z-0 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full transition-[left,top] duration-500 ease-out"
+      className="pointer-events-none fixed z-0 h-[300px] w-[300px] rounded-full transition-transform duration-500 ease-out"
       style={{
+        left: 0,
+        top: 0,
         background:
           "radial-gradient(circle, rgba(0,200,120,0.03) 0%, transparent 70%)",
       }}
@@ -33,24 +41,28 @@ export function ActiveNavHighlight() {
     const sections = document.querySelectorAll("section[id]");
     const navLinks = document.querySelectorAll("[data-nav-link]");
 
+    let rafId: number;
     const onScroll = () => {
-      let current = "";
-      sections.forEach((section) => {
-        const sectionTop = (section as HTMLElement).offsetTop - 100;
-        if (scrollY >= sectionTop) {
-          current = section.getAttribute("id") || "";
-        }
-      });
-
-      navLinks.forEach((link) => {
-        const el = link as HTMLElement;
-        el.style.color =
-          el.getAttribute("href") === "#" + current ? "#F0F0F0" : "";
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        let current = "";
+        sections.forEach((section) => {
+          const sectionTop = (section as HTMLElement).offsetTop - 100;
+          if (scrollY >= sectionTop) current = section.getAttribute("id") || "";
+        });
+        navLinks.forEach((link) => {
+          const el = link as HTMLElement;
+          el.style.color =
+            el.getAttribute("href") === "#" + current ? "#F0F0F0" : "";
+        });
       });
     };
 
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   return null;
