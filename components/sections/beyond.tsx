@@ -6,7 +6,7 @@ import { TiltCard } from "@/components/motion/tilt-card";
 
 export function Beyond() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-20 md:px-12 md:py-[120px]" id="beyond">
+    <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="beyond">
       <SectionHeader number="05" label="Beyond Code" />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
         The engineer
@@ -22,7 +22,7 @@ export function Beyond() {
         {beyondCards.map((card) => (
           <StaggerItem key={card.title}>
             <TiltCard>
-              <Card className="overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-colors hover:border-border-hover">
+              <Card className="overflow-hidden rounded-[20px] border-border-subtle bg-surface p-5 gap-0 shadow-none transition-colors hover:border-border-hover md:p-8">
                 <span className="mb-4 block text-[32px]">{card.emoji}</span>
                 <h4 className="mb-2 font-heading text-[17px] font-bold">
                   {card.title}

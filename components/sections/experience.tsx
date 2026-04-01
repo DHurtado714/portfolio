@@ -6,7 +6,7 @@ import { TimelineDrawLine } from "@/components/motion/timeline-draw";
 
 export function Experience() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-20 md:px-12 md:py-[120px]" id="experience">
+    <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="experience">
       <SectionHeader number="04" label="Experience" />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
         Where I&apos;ve been

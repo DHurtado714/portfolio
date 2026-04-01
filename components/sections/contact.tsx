@@ -6,7 +6,7 @@ import { MagneticButton } from "@/components/motion/magnetic-button";
 export function Contact() {
   return (
     <section
-      className="relative px-5 py-[100px] text-center md:px-12 md:py-[160px]"
+      className="relative px-6 py-16 text-center md:px-12 md:py-[160px]"
       id="contact"
     >
       <div
@@ -34,7 +34,7 @@ export function Contact() {
           conversations about systems that matter.
         </p>
 
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
           {contactLinks.map((link) => (
             <MagneticButton key={link.label}>
               <Button

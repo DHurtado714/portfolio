@@ -10,7 +10,7 @@ export function BlogSection() {
 
   return (
     <section
-      className="mx-auto max-w-[1400px] px-5 py-20 md:px-12 md:py-[120px]"
+      className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]"
       id="blog"
     >
       <SectionHeader number="07" label="Blog" />

@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 export function CursorGlow() {
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
     const glow = document.getElementById("cursorGlow");
     if (!glow) return;
 

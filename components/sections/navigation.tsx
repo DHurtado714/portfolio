@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { NavEntrance } from "@/components/motion/nav-entrance";
 import { NavLogo } from "@/components/motion/nav-logo";
+import { MobileMenu } from "./mobile-menu";
 
 const navItems = [
   { href: "/#about", label: "About" },
@@ -14,7 +15,7 @@ const navItems = [
 export function Navigation() {
   return (
     <NavEntrance>
-      <nav className="fixed top-0 right-0 left-0 z-50 flex h-16 items-center justify-between border-b border-white/[0.04] bg-[#050505]/80 px-5 backdrop-blur-xl backdrop-saturate-[1.2] md:px-12">
+      <nav className="fixed top-0 right-0 left-0 z-50 flex h-16 items-center justify-between border-b border-white/[0.04] bg-[#050505]/80 px-6 backdrop-blur-xl backdrop-saturate-[1.2] md:px-12">
         <NavLogo />
 
         <ul className="hidden gap-9 md:flex">
@@ -36,6 +37,8 @@ export function Navigation() {
           <div className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot" />
           <span>Shipping side projects</span>
         </div>
+
+        <MobileMenu />
       </nav>
     </NavEntrance>
   );

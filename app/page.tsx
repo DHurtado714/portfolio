@@ -19,7 +19,7 @@ import { LayoutGroup } from "@/components/motion/layout-group-wrapper";
 import { TerminalLoader } from "@/components/terminal/terminal-loader";
 function SectionDivider() {
   return (
-    <div className="mx-auto max-w-[1400px] px-5 md:px-12">
+    <div className="mx-auto max-w-[1400px] px-6 md:px-12">
       <hr className="border-none h-px bg-border-subtle" />
     </div>
   );

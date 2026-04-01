@@ -7,7 +7,7 @@ import { HoverLiftCard } from "@/components/motion/hover-lift-card";
 
 export function Expertise() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-20 md:px-12 md:py-[120px]" id="expertise">
+    <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="expertise">
       <SectionHeader number="02" label="Expertise" />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
         What I bring
@@ -24,7 +24,7 @@ export function Expertise() {
         {expertiseData.map((item) => (
           <StaggerItem key={item.title}>
             <HoverLiftCard>
-            <Card className="group relative overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 gap-0 shadow-none transition-all duration-400 hover:border-green/20">
+            <Card className="group relative overflow-hidden rounded-[20px] border-border-subtle bg-surface p-5 gap-0 shadow-none transition-all duration-400 hover:border-green/20 md:p-8">
               <div
                 className="pointer-events-none absolute bottom-0 left-0 right-0 h-[120px] opacity-0 transition-opacity duration-400 group-hover:opacity-100"
                 style={{

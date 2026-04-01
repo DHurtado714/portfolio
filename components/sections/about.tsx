@@ -6,7 +6,7 @@ import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 
 export function About() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-20 md:px-12 md:py-[120px]" id="about">
+    <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="about">
       <SectionHeader number="01" label="About" />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
         Not just what I build,

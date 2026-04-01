@@ -8,7 +8,7 @@ import { TagCascade, TagItem } from "@/components/motion/tag-cascade";
 
 export function Work() {
   return (
-    <section className="mx-auto max-w-[1400px] px-5 py-20 md:px-12 md:py-[120px]" id="work">
+    <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="work">
       <SectionHeader number="03" label="Work" />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
         Impact measured
@@ -24,9 +24,9 @@ export function Work() {
       <StaggerContainer className="mb-16 grid grid-cols-2 gap-6 lg:grid-cols-4">
         {metrics.map((m) => (
           <StaggerItem key={m.label}>
-            <Card className="rounded-[20px] border-border-subtle bg-surface p-10 text-center gap-0 shadow-none transition-all hover:border-green/15">
+            <Card className="rounded-[20px] border-border-subtle bg-surface p-5 text-center gap-0 shadow-none transition-all hover:border-green/15 sm:p-8 md:p-10">
               <div
-                className={`mb-2 font-heading text-[40px] font-extrabold tracking-[-2px] ${m.green ? "text-green" : ""}`}
+                className={`mb-2 font-heading text-[28px] font-extrabold tracking-[-2px] sm:text-[36px] md:text-[40px] ${m.green ? "text-green" : ""}`}
               >
                 <CountUp
                   target={m.numericTarget}
@@ -51,7 +51,7 @@ export function Work() {
         {projects.map((p) => (
           <StaggerItem key={p.title} direction="left">
             <a href={p.href} target="_blank" rel="noopener noreferrer">
-            <Card className="group relative grid cursor-pointer grid-cols-1 items-start gap-8 overflow-hidden rounded-[20px] border-border-subtle bg-surface p-10 shadow-none transition-all duration-400 hover:translate-x-1 hover:border-border-hover md:grid-cols-[1fr_auto]">
+            <Card className="group relative grid cursor-pointer grid-cols-1 items-start gap-6 overflow-hidden rounded-[20px] border-border-subtle bg-surface p-5 shadow-none transition-all duration-400 hover:translate-x-1 hover:border-border-hover sm:p-8 md:grid-cols-[1fr_auto] md:gap-8 md:p-10">
               <span className="absolute top-0 left-0 h-full w-[3px] origin-top scale-y-0 bg-green transition-transform duration-400 group-hover:scale-y-100" />
               <div>
                 <div className="mb-3 flex items-baseline gap-4">
