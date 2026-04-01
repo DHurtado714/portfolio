@@ -30,14 +30,12 @@ export function Hero() {
 
           <HeroItem>
             <h1 className="mt-8 font-heading text-[clamp(44px,7vw,88px)] leading-[1.05] font-extrabold tracking-[-3px]">
-              <span className="block">I think in</span>
+              <span className="block">Daniel</span>
               <span className="block">
                 <ShimmerText className="bg-gradient-to-br from-[#00C878] via-[#00E88F] to-[#00FFB2] bg-clip-text text-transparent">
-                  systems
-                </ShimmerText>{" "}
-                and
+                  Hurtado
+                </ShimmerText>
               </span>
-              <span className="block">build with code.</span>
             </h1>
           </HeroItem>
 

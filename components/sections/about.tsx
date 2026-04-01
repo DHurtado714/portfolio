@@ -22,10 +22,10 @@ export function About() {
               <strong className="font-semibold text-foreground">
                 Colombian engineer
               </strong>{" "}
-              studying Computer Science at{" "}
-              <strong className="font-semibold text-foreground">
+              and Computer Science graduate from{" "}
+              <a href="https://tec.mx" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground underline-offset-2 hover:text-green transition-colors">
                 Tec de Monterrey
-              </strong>{" "}
+              </a>{" "}
               who sees the world as interconnected systems. Whether it&apos;s a
               payment pipeline or the way financial infrastructure flows across
               15+ countries &mdash; I&apos;m drawn to understanding the
@@ -33,9 +33,9 @@ export function About() {
             </p>
             <p className="mb-4 text-base leading-[1.8] text-text-secondary">
               My work at{" "}
-              <strong className="font-semibold text-foreground">
+              <a href="https://capa.fi" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground underline-offset-2 hover:text-green transition-colors">
                 Capa.fi
-              </strong>{" "}
+              </a>{" "}
               sits at the intersection of{" "}
               <strong className="font-semibold text-foreground">
                 backend engineering, financial systems, and machine learning

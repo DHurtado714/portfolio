@@ -74,7 +74,7 @@ export const projects: Project[] = [
       "RabbitMQ",
     ],
     type: "Backend",
-    href: "https://docs.capa.fi",
+    href: "https://capa.fi",
   },
   {
     title: "AI Risk Assessment Platform",
@@ -123,7 +123,7 @@ export const timeline: TimelineEntry[] = [
     date: "2021 — 2025",
     role: "BS Computer Science",
     company: "Tec de Monterrey (ITESM)",
-    desc: "Computer Science and Technology at Monterrey Institute of Technology. GPA 96.2/100. Combining academic foundations with real-world engineering experience throughout the program.",
+    desc: "Computer Science and Technology at Monterrey Institute of Technology. GPA 96.2/100. Graduated combining academic foundations with real-world engineering experience.",
     current: false,
   },
 ];
