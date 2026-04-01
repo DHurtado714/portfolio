@@ -4,6 +4,7 @@ import { ParallaxLayer } from "@/components/motion/parallax-layer";
 import { HeroEntrance, HeroItem } from "@/components/motion/hero-entrance";
 import { Typewriter } from "@/components/motion/typewriter";
 import { ShimmerText } from "@/components/motion/shimmer";
+import { HeroScene } from "@/components/motion/hero-scene";
 
 export function Hero() {
   return (
@@ -21,52 +22,58 @@ export function Hero() {
           }}
         />
 
-        <HeroEntrance>
-          <HeroItem>
-            <div className="font-mono text-xs uppercase tracking-[4px] text-green">
-              <Typewriter text="Software Engineer — Backend · Fintech · ML" speed={35} startDelay={600} />
-            </div>
-          </HeroItem>
+        <div className="grid items-center gap-8 md:grid-cols-2">
+          <HeroEntrance>
+            <HeroItem>
+              <div className="font-mono text-xs uppercase tracking-[4px] text-green">
+                <Typewriter text="Software Engineer — Backend · Fintech · ML" speed={35} startDelay={600} />
+              </div>
+            </HeroItem>
 
-          <HeroItem>
-            <h1 className="mt-8 font-heading text-[clamp(44px,7vw,88px)] leading-[1.05] font-extrabold tracking-[-3px]">
-              <span className="block">Daniel</span>
-              <span className="block">
-                <ShimmerText className="bg-gradient-to-br from-[#00C878] via-[#00E88F] to-[#00FFB2] bg-clip-text text-transparent">
-                  Hurtado
-                </ShimmerText>
-              </span>
-            </h1>
-          </HeroItem>
+            <HeroItem>
+              <h1 className="mt-8 font-heading text-[clamp(44px,7vw,88px)] leading-[1.05] font-extrabold tracking-[-3px]">
+                <span className="block">Daniel</span>
+                <span className="block">
+                  <ShimmerText className="bg-gradient-to-br from-[#00C878] via-[#00E88F] to-[#00FFB2] bg-clip-text text-transparent">
+                    Hurtado
+                  </ShimmerText>
+                </span>
+              </h1>
+            </HeroItem>
 
-          <HeroItem>
-            <p className="mt-8 max-w-[540px] text-lg leading-[1.7] text-text-secondary">
-              Engineer obsessed with how things connect &mdash; from distributed
-              architectures to financial flows across borders. With 4+ years in
-              fintech and systems spanning 15+ countries, I build infrastructure
-              that moves money across borders.
-            </p>
-          </HeroItem>
+            <HeroItem>
+              <p className="mt-8 max-w-[540px] text-lg leading-[1.7] text-text-secondary">
+                Engineer obsessed with how things connect &mdash; from distributed
+                architectures to financial flows across borders. With 4+ years in
+                fintech and systems spanning 15+ countries, I build infrastructure
+                that moves money across borders.
+              </p>
+            </HeroItem>
 
-          <HeroItem>
-            <div className="mt-10 flex gap-4">
-              <Button
-                asChild
-                className="h-auto rounded-[10px] bg-green px-7 py-3.5 font-semibold text-[#050505] hover:-translate-y-0.5 hover:bg-green-light hover:shadow-[0_8px_24px_rgba(0,200,120,0.2)]"
-              >
-                <Link href="#work">View my work &darr;</Link>
-              </Button>
-              <Button
-                asChild
-                variant="ghost"
-                className="h-auto rounded-[10px] border border-border-hover bg-transparent px-7 py-3.5 text-text-secondary hover:-translate-y-0.5 hover:border-text-muted hover:bg-transparent hover:text-foreground dark:hover:bg-transparent"
-              >
-                <Link href="#contact">Get in touch</Link>
-              </Button>
-            </div>
-          </HeroItem>
+            <HeroItem>
+              <div className="mt-10 flex gap-4">
+                <Button
+                  asChild
+                  className="h-auto rounded-[10px] bg-green px-7 py-3.5 font-semibold text-[#050505] hover:-translate-y-0.5 hover:bg-green-light hover:shadow-[0_8px_24px_rgba(0,200,120,0.2)]"
+                >
+                  <Link href="#work">View my work &darr;</Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="h-auto rounded-[10px] border border-border-hover bg-transparent px-7 py-3.5 text-text-secondary hover:-translate-y-0.5 hover:border-text-muted hover:bg-transparent hover:text-foreground dark:hover:bg-transparent"
+                >
+                  <Link href="#contact">Get in touch</Link>
+                </Button>
+              </div>
+            </HeroItem>
+          </HeroEntrance>
 
-        </HeroEntrance>
+          {/* 3D Torus Knot */}
+          <div className="hidden md:flex h-[520px] w-full items-center justify-center">
+            <HeroScene />
+          </div>
+        </div>
 
         {/* Scroll indicator — positioned relative to section, outside HeroEntrance */}
         <div className="absolute bottom-10 left-5 hidden items-center gap-3 font-mono text-[10px] tracking-[2px] text-text-muted md:flex md:left-12">
