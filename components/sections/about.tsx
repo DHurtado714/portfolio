@@ -101,10 +101,10 @@ export function About({ locale }: { locale: Locale }) {
               <Card className="group relative overflow-hidden border-border-subtle bg-surface p-6 gap-0 shadow-none transition-all hover:-translate-y-0.5 hover:border-border-hover">
                 <span className="absolute top-0 left-0 right-0 h-0.5 origin-left scale-x-0 bg-green transition-transform group-hover:scale-x-100" />
                 <span className="mb-3 block text-2xl">{card.icon}</span>
-                <h4 className="mb-1.5 font-heading text-[15px] font-bold">
+                <h4 className="mb-1.5 font-heading text-[17px] font-bold">
                   {card.title}
                 </h4>
-                <p className="text-[13px] leading-normal text-text-muted">
+                <p className="text-[15px] leading-normal text-text-muted">
                   {card.desc}
                 </p>
               </Card>

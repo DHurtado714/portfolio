@@ -24,7 +24,7 @@ export function BlogCard({
       <Card className="group relative cursor-pointer overflow-hidden rounded-[20px] border-border-subtle bg-surface p-8 shadow-none transition-all duration-400 hover:translate-x-1 hover:border-border-hover">
         <span className="absolute top-0 left-0 h-full w-[3px] origin-top scale-y-0 bg-green transition-transform duration-400 group-hover:scale-y-100" />
 
-        <div className="mb-3 flex flex-wrap items-center gap-3 font-mono text-[11px] text-text-muted">
+        <div className="mb-3 flex flex-wrap items-center gap-3 font-mono text-[13px] text-text-muted">
           <span className="flex items-center gap-1.5">
             <Calendar className="h-3 w-3" />
             {formattedDate}
@@ -35,11 +35,11 @@ export function BlogCard({
           </span>
         </div>
 
-        <h3 className="mb-2 font-heading text-[20px] font-bold tracking-[-0.5px] transition-colors group-hover:text-green">
+        <h3 className="mb-2 font-heading text-[22px] font-bold tracking-[-0.5px] transition-colors group-hover:text-green">
           {post.title}
         </h3>
 
-        <p className="mb-4 text-[15px] leading-[1.7] text-text-secondary line-clamp-2">
+        <p className="mb-4 text-[17px] leading-[1.7] text-text-secondary line-clamp-2">
           {post.description}
         </p>
 
@@ -48,7 +48,7 @@ export function BlogCard({
             <Badge
               key={tag}
               variant="outline"
-              className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] font-normal tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
+              className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono text-[12px] font-normal tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
             >
               {tag}
             </Badge>

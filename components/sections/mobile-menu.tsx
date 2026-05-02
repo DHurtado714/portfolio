@@ -56,17 +56,17 @@ export function MobileMenu({ locale }: { locale: Locale }) {
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className="flex items-center justify-between border-b border-border-subtle py-5 font-heading text-[22px] font-bold transition-colors hover:text-green"
+              className="flex items-center justify-between border-b border-border-subtle py-5 font-heading text-[24px] font-bold transition-colors hover:text-green"
             >
               {item.label}
-              <span className="font-mono text-[11px] tracking-[2px] text-text-muted">
+              <span className="font-mono text-[13px] tracking-[2px] text-text-muted">
                 {String(i + 1).padStart(2, "0")}
               </span>
             </Link>
           ))}
         </nav>
 
-        <div className="mt-auto px-6 pb-10 flex items-center gap-2 font-mono text-[11px] text-text-muted">
+        <div className="mt-auto px-6 pb-10 flex items-center gap-2 font-mono text-[13px] text-text-muted">
           <div className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot" />
           <span>{t.shippingStatus}</span>
         </div>

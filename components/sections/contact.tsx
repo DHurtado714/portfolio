@@ -32,7 +32,7 @@ export function Contact({ locale }: { locale: Locale }) {
           </span>{" "}
           {t.headline3}
         </h2>
-        <p className="mx-auto mb-10 max-w-[480px] text-[17px] leading-[1.7] text-text-secondary">
+        <p className="mx-auto mb-10 max-w-[480px] text-[19px] leading-[1.7] text-text-secondary">
           {t.description}
         </p>
 
@@ -42,7 +42,7 @@ export function Contact({ locale }: { locale: Locale }) {
               <Button
                 asChild
                 variant="ghost"
-                className="group h-auto flex gap-2.5 rounded-[10px] border border-border-subtle bg-surface px-6 py-3.5 font-mono font-normal text-[13px] text-text-secondary hover:border-green hover:bg-transparent hover:text-green dark:hover:bg-transparent"
+                className="group h-auto flex gap-2.5 rounded-[10px] border border-border-subtle bg-surface px-6 py-3.5 font-mono font-normal text-[15px] text-text-secondary hover:border-green hover:bg-transparent hover:text-green dark:hover:bg-transparent"
               >
                 <a
                   href={link.href}

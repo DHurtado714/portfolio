@@ -22,7 +22,7 @@ export function Callout({ type = "info", children }: CalloutProps) {
     >
       <div className="flex gap-3">
         <span className="mt-0.5 text-lg">{icons[type]}</span>
-        <div className="[&>p]:mb-0 [&>p]:text-[15px]">{children}</div>
+        <div className="[&>p]:mb-0 [&>p]:text-[17px]">{children}</div>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ export function Navigation({ locale }: { locale: Locale }) {
               <Link
                 href={item.href}
                 data-nav-link
-                className="group relative font-mono text-[11px] uppercase tracking-[1.5px] text-text-muted transition-colors hover:text-foreground"
+                className="group relative font-mono text-[13px] uppercase tracking-[1.5px] text-text-muted transition-colors hover:text-foreground"
               >
                 {item.label}
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-green transition-all duration-300 group-hover:w-full" />
@@ -29,7 +29,7 @@ export function Navigation({ locale }: { locale: Locale }) {
           ))}
         </ul>
 
-        <div className="hidden items-center gap-2 font-mono text-[11px] text-text-muted md:flex">
+        <div className="hidden items-center gap-2 font-mono text-[13px] text-text-muted md:flex">
           <div className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot" />
           <span>{t.shippingStatus}</span>
         </div>

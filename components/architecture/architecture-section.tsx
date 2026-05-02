@@ -29,7 +29,7 @@ export function ArchitectureSection() {
           <br />
           real deliverable.
         </h2>
-        <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+        <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
           A simplified view of the cross-border payment system I architected.
           Hover over nodes to explore each service&apos;s role, tech stack, and
           the real engineering challenges behind it.

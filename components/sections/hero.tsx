@@ -76,7 +76,7 @@ export function Hero({ locale }: { locale: Locale }) {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-6 hidden items-center gap-3 font-mono text-[10px] tracking-[2px] text-text-muted md:flex md:left-12">
+        <div className="absolute bottom-10 left-6 hidden items-center gap-3 font-mono text-[12px] tracking-[2px] text-text-muted md:flex md:left-12">
           <span>{t.scroll}</span>
           <div className="h-px w-10 animate-scroll-pulse bg-linear-to-r from-green to-transparent" />
         </div>

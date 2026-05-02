@@ -23,7 +23,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
   }
 
   return (
-    <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[1.5px]">
+    <div className="flex items-center gap-1.5 font-mono text-[13px] uppercase tracking-[1.5px]">
       {LOCALES.map((lang, i) => (
         <span key={lang} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-border-subtle">/</span>}

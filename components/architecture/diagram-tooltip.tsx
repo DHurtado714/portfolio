@@ -26,11 +26,11 @@ export function DiagramTooltip({
           }}
         >
           <h4 className="mb-1 font-heading text-sm font-bold">{node.label}</h4>
-          <p className="mb-3 text-[12px] leading-[1.6] text-text-secondary">
+          <p className="mb-3 text-[14px] leading-[1.6] text-text-secondary">
             {node.role}
           </p>
           {node.challenge && (
-            <p className="mb-3 text-[11px] leading-[1.6] text-green/80">
+            <p className="mb-3 text-[13px] leading-[1.6] text-green/80">
               Challenge: {node.challenge}
             </p>
           )}
@@ -39,7 +39,7 @@ export function DiagramTooltip({
               <Badge
                 key={t}
                 variant="outline"
-                className="rounded-md border-border-subtle bg-white/[0.04] px-2 py-0.5 font-mono font-normal text-[9px] tracking-[0.5px] text-text-muted"
+                className="rounded-md border-border-subtle bg-white/[0.04] px-2 py-0.5 font-mono font-normal text-[11px] tracking-[0.5px] text-text-muted"
               >
                 {t}
               </Badge>

@@ -26,7 +26,7 @@ export async function GitHubActivity() {
           <br />
           than claims.
         </h2>
-        <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+        <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
           Consistent contributions across backend systems, fintech
           infrastructure, and open-source experiments.
         </p>
@@ -35,14 +35,14 @@ export async function GitHubActivity() {
       <GitHubStatCards stats={stats} />
 
       <div className="mb-12">
-        <h3 className="mb-6 font-mono text-[11px] uppercase tracking-[3px] text-text-muted">
+        <h3 className="mb-6 font-mono text-[13px] uppercase tracking-[3px] text-text-muted">
           Contribution Activity
         </h3>
         <ContributionGraph contributions={contributions} />
       </div>
 
       <div>
-        <h3 className="mb-4 font-mono text-[11px] uppercase tracking-[3px] text-text-muted">
+        <h3 className="mb-4 font-mono text-[13px] uppercase tracking-[3px] text-text-muted">
           Recent Activity
         </h3>
         <ActivityFeed events={events} />

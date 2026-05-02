@@ -18,7 +18,7 @@ export function Expertise({ locale }: { locale: Locale }) {
         <br />
         {t.headline2}
       </h2>
-      <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+      <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
         {t.description}
       </p>
 
@@ -33,7 +33,7 @@ export function Expertise({ locale }: { locale: Locale }) {
                   background: "linear-gradient(to top, rgba(0,200,120,0.08), transparent)",
                 }}
               />
-              <span className="mb-6 block font-mono text-[28px] text-green">
+              <span className="mb-6 block font-mono text-[30px] text-green">
                 {item.icon}
               </span>
               <h3 className="mb-3 font-heading text-xl font-bold tracking-[-0.5px]">
@@ -47,7 +47,7 @@ export function Expertise({ locale }: { locale: Locale }) {
                   <Badge
                     key={tag}
                     variant="outline"
-                    className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
+                    className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[12px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
                   >
                     {tag}
                   </Badge>

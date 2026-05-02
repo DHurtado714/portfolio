@@ -65,7 +65,7 @@ export default async function BlogPage({
         <div className="mb-12 flex items-center justify-between">
           <Link
             href={`/${locale as Locale}`}
-            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
+            className="group inline-flex items-center gap-2 font-mono text-[13px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
             {t.home}
@@ -76,7 +76,7 @@ export default async function BlogPage({
         <h1 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] font-extrabold leading-[1.1] tracking-[-2px]">
           {t.blogTitle}
         </h1>
-        <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+        <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
           {t.blogDescription}
         </p>
 

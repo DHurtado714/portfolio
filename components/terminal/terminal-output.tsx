@@ -18,7 +18,7 @@ export function TerminalOutput({ history }: { history: HistoryEntry[] }) {
   }, [history]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 font-mono text-[12px] leading-[1.7]">
+    <div className="flex-1 overflow-y-auto p-4 font-mono text-[14px] leading-[1.7]">
       {history.map((entry, i) => (
         <div key={i} className="mb-3">
           {entry.command && (

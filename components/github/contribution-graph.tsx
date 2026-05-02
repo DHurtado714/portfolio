@@ -53,7 +53,7 @@ export function ContributionGraph({
         {monthLabels.map((m, i) => (
           <span
             key={`${m.label}-${i}`}
-            className="font-mono text-[10px] text-text-muted"
+            className="font-mono text-[12px] text-text-muted"
             style={{
               position: "absolute",
               left: `${m.col * 16 + 32}px`,
@@ -69,7 +69,7 @@ export function ContributionGraph({
           {DAY_LABELS.map((label, i) => (
             <div
               key={i}
-              className="flex h-[13px] items-center font-mono text-[9px] text-text-muted"
+              className="flex h-[13px] items-center font-mono text-[11px] text-text-muted"
             >
               {label}
             </div>
@@ -118,7 +118,7 @@ export function ContributionGraph({
 
       {hoveredDay && (
         <div
-          className="pointer-events-none absolute z-10 rounded-md bg-surface-elevated px-2.5 py-1.5 font-mono text-[10px] text-text-secondary shadow-lg border border-border-subtle"
+          className="pointer-events-none absolute z-10 rounded-md bg-surface-elevated px-2.5 py-1.5 font-mono text-[12px] text-text-secondary shadow-lg border border-border-subtle"
           style={{ left: hoveredDay.x, top: hoveredDay.y }}
         >
           <span className="text-foreground font-medium">
@@ -129,11 +129,11 @@ export function ContributionGraph({
       )}
 
       <div className="mt-4 flex items-center justify-end gap-2">
-        <span className="font-mono text-[10px] text-text-muted">Less</span>
+        <span className="font-mono text-[12px] text-text-muted">Less</span>
         {LEVEL_COLORS.map((color, i) => (
           <div key={i} className={`h-[11px] w-[11px] rounded-sm ${color}`} />
         ))}
-        <span className="font-mono text-[10px] text-text-muted">More</span>
+        <span className="font-mono text-[12px] text-text-muted">More</span>
       </div>
     </div>
   );

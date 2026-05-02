@@ -18,7 +18,7 @@ export function BlogSection() {
         Thoughts &<br />
         technical writing.
       </h2>
-      <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+      <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
         Writing about backend architecture, fintech systems, and lessons learned
         building software at scale.
       </p>
@@ -31,7 +31,7 @@ export function BlogSection() {
 
       <Link
         href="/blog"
-        className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
+        className="group inline-flex items-center gap-2 font-mono text-[13px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
       >
         View all posts
         <span className="transition-transform group-hover:translate-x-1">

@@ -23,10 +23,10 @@ export function DiagramMobile() {
           >
             <div className="flex items-center justify-between p-5">
               <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-green/10 font-mono text-[11px] text-green">
+                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-green/10 font-mono text-[13px] text-green">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="font-heading text-[15px] font-bold">
+                <span className="font-heading text-[17px] font-bold">
                   {node.label}
                 </span>
               </div>
@@ -48,11 +48,11 @@ export function DiagramMobile() {
                   className="overflow-hidden"
                 >
                   <div className="border-t border-border-subtle px-5 pt-4 pb-5">
-                    <p className="mb-3 text-[13px] leading-[1.6] text-text-secondary">
+                    <p className="mb-3 text-[15px] leading-[1.6] text-text-secondary">
                       {node.role}
                     </p>
                     {node.challenge && (
-                      <p className="mb-3 text-[11px] leading-[1.6] text-green/80">
+                      <p className="mb-3 text-[13px] leading-[1.6] text-green/80">
                         Challenge: {node.challenge}
                       </p>
                     )}
@@ -61,7 +61,7 @@ export function DiagramMobile() {
                         <Badge
                           key={t}
                           variant="outline"
-                          className="rounded-md border-border-subtle bg-white/[0.04] px-2 py-0.5 font-mono font-normal text-[9px] tracking-[0.5px] text-text-muted"
+                          className="rounded-md border-border-subtle bg-white/[0.04] px-2 py-0.5 font-mono font-normal text-[11px] tracking-[0.5px] text-text-muted"
                         >
                           {t}
                         </Badge>

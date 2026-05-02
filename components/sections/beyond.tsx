@@ -17,7 +17,7 @@ export function Beyond({ locale }: { locale: Locale }) {
         <br />
         {t.headline2}
       </h2>
-      <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+      <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
         {t.description}
       </p>
 
@@ -26,11 +26,11 @@ export function Beyond({ locale }: { locale: Locale }) {
           <StaggerItem key={card.title}>
             <TiltCard>
               <Card className="overflow-hidden rounded-[20px] border-border-subtle bg-surface p-5 gap-0 shadow-none transition-colors hover:border-border-hover md:p-8">
-                <span className="mb-4 block text-[32px]">{card.emoji}</span>
-                <h4 className="mb-2 font-heading text-[17px] font-bold">
+                <span className="mb-4 block text-[34px]">{card.emoji}</span>
+                <h4 className="mb-2 font-heading text-[19px] font-bold">
                   {card.title}
                 </h4>
-                <p className="text-[13px] leading-relaxed text-text-muted">
+                <p className="text-[15px] leading-relaxed text-text-muted">
                   {card.desc}
                 </p>
               </Card>

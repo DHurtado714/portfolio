@@ -232,7 +232,7 @@ export function ArchitectureDiagram() {
                 y={node.y + NODE_HEIGHT / 2 + 1}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="fill-foreground font-mono text-[11px]"
+                className="fill-foreground font-mono text-[13px]"
               >
                 {node.label}
               </text>

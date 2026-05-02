@@ -23,14 +23,14 @@ export function ActivityFeed({ events }: { events: GitHubEvent[] }) {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[11px] text-green">
+                <span className="font-mono text-[13px] text-green">
                   {event.repo}
                 </span>
-                <span className="font-mono text-[10px] text-text-muted">
+                <span className="font-mono text-[12px] text-text-muted">
                   {event.time}
                 </span>
               </div>
-              <p className="truncate text-[13px] text-text-secondary">
+              <p className="truncate text-[15px] text-text-secondary">
                 {event.message}
               </p>
             </div>

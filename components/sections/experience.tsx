@@ -17,7 +17,7 @@ export function Experience({ locale }: { locale: Locale }) {
         <br />
         {t.headline2}
       </h2>
-      <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+      <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
         {t.description}
       </p>
 
@@ -40,7 +40,7 @@ export function Experience({ locale }: { locale: Locale }) {
                   />
                 </ScrollReveal>
                 <div
-                  className={`mb-2 font-mono text-[11px] tracking-[2px] ${
+                  className={`mb-2 font-mono text-[13px] tracking-[2px] ${
                     item.current ? "text-green" : "text-text-muted"
                   }`}
                 >
@@ -49,7 +49,7 @@ export function Experience({ locale }: { locale: Locale }) {
                 <div className="mb-1 font-heading text-xl font-bold">
                   {item.role}
                 </div>
-                <div className="mb-3 text-[15px] text-text-secondary">
+                <div className="mb-3 text-[17px] text-text-secondary">
                   {item.company}
                 </div>
                 <p className="max-w-[500px] text-sm leading-[1.7] text-text-muted">

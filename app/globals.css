@@ -73,7 +73,6 @@
 }
 
 html {
-  font-size: 18px;
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
   overflow-x: clip;
@@ -85,6 +84,9 @@ html {
 }
 
 @layer base {
+  html {
+    font-size: 18px;
+  }
   * {
     @apply border-border;
   }

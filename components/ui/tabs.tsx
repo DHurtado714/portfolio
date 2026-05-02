@@ -42,7 +42,7 @@ export function TabsTrigger({
   return (
     <button
       onClick={() => ctx.setValue(value)}
-      className={`rounded-md px-3 py-1.5 font-mono text-[12px] uppercase tracking-[1px] transition-colors ${
+      className={`rounded-md px-3 py-1.5 font-mono text-[14px] uppercase tracking-[1px] transition-colors ${
         active
           ? "bg-green/10 text-green"
           : "text-text-muted hover:text-text-secondary"

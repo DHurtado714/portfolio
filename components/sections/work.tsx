@@ -19,7 +19,7 @@ export function Work({ locale }: { locale: Locale }) {
         <br />
         {t.headline2}
       </h2>
-      <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
+      <p className="mb-16 max-w-[560px] text-[19px] leading-[1.7] text-text-secondary">
         {t.description}
       </p>
 
@@ -29,7 +29,7 @@ export function Work({ locale }: { locale: Locale }) {
           <StaggerItem key={m.label}>
             <Card className="rounded-[20px] border-border-subtle bg-surface p-5 text-center gap-0 shadow-none transition-all hover:border-green/15 sm:p-8 md:p-10">
               <div
-                className={`mb-2 font-heading text-[28px] font-extrabold tracking-[-2px] sm:text-[36px] md:text-[40px] ${m.green ? "text-green" : ""}`}
+                className={`mb-2 font-heading text-[30px] font-extrabold tracking-[-2px] sm:text-[38px] md:text-[42px] ${m.green ? "text-green" : ""}`}
               >
                 <CountUp
                   target={m.numericTarget}
@@ -38,7 +38,7 @@ export function Work({ locale }: { locale: Locale }) {
                   decimals={m.decimals}
                 />
               </div>
-              <div className="font-mono text-[10px] uppercase tracking-[2px] text-text-muted">
+              <div className="font-mono text-[12px] uppercase tracking-[2px] text-text-muted">
                 {m.label}
               </div>
             </Card>
@@ -47,7 +47,7 @@ export function Work({ locale }: { locale: Locale }) {
       </StaggerContainer>
 
       {/* Projects */}
-      <h3 className="mb-8 font-mono text-[11px] uppercase tracking-[3px] text-text-muted">
+      <h3 className="mb-8 font-mono text-[13px] uppercase tracking-[3px] text-text-muted">
         {t.selectedProjects}
       </h3>
       <StaggerContainer className="flex flex-col gap-6">
@@ -58,12 +58,12 @@ export function Work({ locale }: { locale: Locale }) {
               <span className="absolute top-0 left-0 h-full w-[3px] origin-top scale-y-0 bg-green transition-transform duration-400 group-hover:scale-y-100" />
               <div>
                 <div className="mb-3 flex items-baseline gap-4">
-                  <span className="font-heading text-[22px] font-bold tracking-[-0.5px]">
+                  <span className="font-heading text-[24px] font-bold tracking-[-0.5px]">
                     {p.title}
                   </span>
                   <span className="font-mono text-xs text-green">{p.year}</span>
                 </div>
-                <p className="mb-4 max-w-[600px] text-[15px] leading-[1.7] text-text-secondary">
+                <p className="mb-4 max-w-[600px] text-[17px] leading-[1.7] text-text-secondary">
                   {p.desc}
                 </p>
                 <TagCascade className="flex flex-wrap gap-1.5">
@@ -71,7 +71,7 @@ export function Work({ locale }: { locale: Locale }) {
                     <TagItem key={tag}>
                       <Badge
                         variant="outline"
-                        className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[10px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
+                        className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono font-normal text-[12px] tracking-[0.5px] text-text-muted transition-all hover:border-green hover:text-green"
                       >
                         {tag}
                       </Badge>
@@ -82,7 +82,7 @@ export function Work({ locale }: { locale: Locale }) {
               <div className="flex items-start gap-3 md:flex-col md:items-end">
                 <Badge
                   variant="outline"
-                  className="border-border-subtle px-3.5 py-1.5 font-mono font-normal text-[10px] uppercase tracking-[2px] text-text-muted"
+                  className="border-border-subtle px-3.5 py-1.5 font-mono font-normal text-[12px] uppercase tracking-[2px] text-text-muted"
                 >
                   {p.type}
                 </Badge>

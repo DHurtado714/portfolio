@@ -50,14 +50,14 @@ export function TerminalInput({
 
   return (
     <div className="flex items-center gap-2 border-t border-white/[0.06] px-4 py-3">
-      <span className="font-mono text-[12px] text-green">$</span>
+      <span className="font-mono text-[14px] text-green">$</span>
       <input
         ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="flex-1 bg-transparent font-mono text-[12px] text-foreground outline-none placeholder:text-text-muted"
+        className="flex-1 bg-transparent font-mono text-[14px] text-foreground outline-none placeholder:text-text-muted"
         placeholder="Type a command..."
         autoComplete="off"
         spellCheck={false}

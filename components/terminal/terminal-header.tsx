@@ -14,7 +14,7 @@ export function TerminalHeader({ onClose }: { onClose: () => void }) {
           <div className="h-3 w-3 rounded-full bg-[#28C840]" />
         </div>
       </div>
-      <span className="font-mono text-[11px] text-text-muted">
+      <span className="font-mono text-[13px] text-text-muted">
         daniel@portfolio ~ $
       </span>
       <button

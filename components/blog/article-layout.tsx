@@ -84,7 +84,7 @@ export function ArticleLayout({
         <div className="mb-12 flex items-center justify-between">
           <Link
             href={`/${locale}/blog`}
-            className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
+            className="group inline-flex items-center gap-2 font-mono text-[13px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
             {t.backToBlog}
@@ -96,10 +96,10 @@ export function ArticleLayout({
           <h1 className="mb-5 font-heading text-[clamp(32px,4vw,48px)] font-extrabold leading-[1.1] tracking-[-2px]">
             {post.title}
           </h1>
-          <p className="mb-6 text-[17px] leading-[1.7] text-text-secondary">
+          <p className="mb-6 text-[19px] leading-[1.7] text-text-secondary">
             {post.description}
           </p>
-          <div className="mb-6 flex flex-wrap items-center gap-4 font-mono text-[11px] text-text-muted">
+          <div className="mb-6 flex flex-wrap items-center gap-4 font-mono text-[13px] text-text-muted">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
               {formattedDate}
@@ -114,7 +114,7 @@ export function ArticleLayout({
               <Badge
                 key={tag}
                 variant="outline"
-                className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono text-[10px] font-normal tracking-[0.5px] text-text-muted"
+                className="rounded-md border-border-subtle bg-white/[0.04] px-2.5 py-1 font-mono text-[12px] font-normal tracking-[0.5px] text-text-muted"
               >
                 {tag}
               </Badge>
