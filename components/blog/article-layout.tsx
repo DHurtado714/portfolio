@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import type { BlogPost } from "@/lib/content";
 import { type Locale, translations } from "@/lib/i18n";
-import { LanguageSwitcher } from "./language-switcher";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function ArticleLayout({
   post,
@@ -14,7 +14,7 @@ export function ArticleLayout({
   locale: Locale;
   children: React.ReactNode;
 }) {
-  const t = translations[locale];
+  const t = translations[locale].blog;
   const dateLocale = locale === "es" ? "es-ES" : "en-US";
 
   const formattedDate = new Date(post.date).toLocaleDateString(dateLocale, {

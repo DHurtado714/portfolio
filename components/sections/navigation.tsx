@@ -2,17 +2,13 @@ import Link from "next/link";
 import { NavEntrance } from "@/components/motion/nav-entrance";
 import { NavLogo } from "@/components/motion/nav-logo";
 import { MobileMenu } from "./mobile-menu";
+import { getNavItems } from "@/lib/nav-items";
+import { translations, type Locale } from "@/lib/i18n";
 
-const navItems = [
-  { href: "/#about", label: "About" },
-  { href: "/#expertise", label: "Expertise" },
-  { href: "/#work", label: "Work" },
-  { href: "/#experience", label: "Experience" },
-  { href: "/blog", label: "Blog" },
-  { href: "/#contact", label: "Contact" },
-];
+export function Navigation({ locale }: { locale: Locale }) {
+  const navItems = getNavItems(locale);
+  const t = translations[locale].nav;
 
-export function Navigation() {
   return (
     <NavEntrance>
       <nav className="fixed top-0 right-0 left-0 z-50 flex h-16 items-center justify-between border-b border-white/[0.04] bg-[#050505]/80 px-6 backdrop-blur-xl backdrop-saturate-[1.2] md:px-12">
@@ -35,10 +31,10 @@ export function Navigation() {
 
         <div className="hidden items-center gap-2 font-mono text-[11px] text-text-muted md:flex">
           <div className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot" />
-          <span>Shipping side projects</span>
+          <span>{t.shippingStatus}</span>
         </div>
 
-        <MobileMenu />
+        <MobileMenu locale={locale} />
       </nav>
     </NavEntrance>
   );

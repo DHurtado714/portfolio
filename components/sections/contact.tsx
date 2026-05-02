@@ -2,8 +2,11 @@ import { contactLinks } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { MagneticButton } from "@/components/motion/magnetic-button";
+import { translations, type Locale } from "@/lib/i18n";
 
-export function Contact() {
+export function Contact({ locale }: { locale: Locale }) {
+  const t = translations[locale].contact;
+
   return (
     <section
       className="relative px-6 py-16 text-center md:px-12 md:py-[160px]"
@@ -22,16 +25,15 @@ export function Contact() {
           06
         </span>
         <h2 className="mb-4 font-heading text-[clamp(36px,5vw,60px)] font-extrabold tracking-[-2px]">
-          Let&apos;s build
+          {t.headline1}
           <br />
           <span className="bg-gradient-to-br from-[#00C878] to-[#00E88F] bg-clip-text text-transparent">
-            something
+            {t.headline2}
           </span>{" "}
-          together.
+          {t.headline3}
         </h2>
         <p className="mx-auto mb-10 max-w-[480px] text-[17px] leading-[1.7] text-text-secondary">
-          Open to fintech opportunities, interesting backend challenges, and
-          conversations about systems that matter.
+          {t.description}
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 sm:gap-6">

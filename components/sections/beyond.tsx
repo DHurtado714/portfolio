@@ -1,21 +1,24 @@
-import { beyondCards } from "@/lib/data";
+import { getData } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "./section-header";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 import { TiltCard } from "@/components/motion/tilt-card";
+import { translations, type Locale } from "@/lib/i18n";
 
-export function Beyond() {
+export function Beyond({ locale }: { locale: Locale }) {
+  const t = translations[locale].beyond;
+  const { beyondCards } = getData(locale);
+
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="beyond">
-      <SectionHeader number="05" label="Beyond Code" />
+      <SectionHeader number="05" label={t.sectionLabel} />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
-        The engineer
+        {t.headline1}
         <br />
-        outside the terminal.
+        {t.headline2}
       </h2>
       <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
-        I believe the best engineers are the ones with lives outside their code
-        editors. Context, curiosity, and movement fuel better thinking.
+        {t.description}
       </p>
 
       <StaggerContainer className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">

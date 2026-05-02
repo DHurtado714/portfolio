@@ -7,6 +7,7 @@ import { BlogCard } from "@/components/blog/blog-card";
 import { LanguageSwitcher } from "@/components/blog/language-switcher";
 import { Navigation } from "@/components/sections/navigation";
 import { Footer } from "@/components/sections/footer";
+import type { Locale } from "@/lib/i18n";
 import { ArrowLeft } from "lucide-react";
 
 type Params = { locale: string };
@@ -19,7 +20,7 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!isValidLocale(locale)) return {};
 
-  const t = translations[locale];
+  const t = translations[locale].blog;
   return {
     title: t.blogTitle,
     description: t.blogDescription,
@@ -54,16 +55,16 @@ export default async function BlogPage({
   const { locale } = await params;
   if (!isValidLocale(locale)) notFound();
 
-  const t = translations[locale];
+  const t = translations[locale].blog;
   const posts = getAllPosts(locale);
 
   return (
     <>
-      <Navigation />
+      <Navigation locale={locale as Locale} />
       <main className="mx-auto max-w-[1400px] px-5 pt-32 pb-20 md:px-12">
         <div className="mb-12 flex items-center justify-between">
           <Link
-            href="/"
+            href={`/${locale as Locale}`}
             className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[2px] text-text-muted transition-colors hover:text-green"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
@@ -89,7 +90,7 @@ export default async function BlogPage({
           </div>
         )}
       </main>
-      <Footer />
+      <Footer locale={locale as Locale} />
     </>
   );
 }

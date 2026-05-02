@@ -1,22 +1,24 @@
-import { timeline } from "@/lib/data";
+import { getData } from "@/lib/data";
 import { SectionHeader } from "./section-header";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
 import { TimelineDrawLine } from "@/components/motion/timeline-draw";
+import { translations, type Locale } from "@/lib/i18n";
 
-export function Experience() {
+export function Experience({ locale }: { locale: Locale }) {
+  const t = translations[locale].experience;
+  const { timeline } = getData(locale);
+
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="experience">
-      <SectionHeader number="04" label="Experience" />
+      <SectionHeader number="04" label={t.sectionLabel} />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
-        Where I&apos;ve been
+        {t.headline1}
         <br />
-        building.
+        {t.headline2}
       </h2>
       <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
-        My career has been focused on building financial infrastructure in Latin
-        America, with a constant thread of clean architecture and systems
-        thinking.
+        {t.description}
       </p>
 
       <div className="relative pl-10">

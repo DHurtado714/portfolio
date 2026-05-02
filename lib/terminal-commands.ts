@@ -1,9 +1,6 @@
-import {
-  contactLinks,
-  expertiseData,
-  projects,
-  timeline,
-} from "@/lib/data";
+import { getData } from "@/lib/data";
+
+const { contactLinks, expertiseData, projects, timeline } = getData("en");
 
 export interface CommandResult {
   type: "text" | "html";

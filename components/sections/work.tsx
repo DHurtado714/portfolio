@@ -1,23 +1,26 @@
-import { metrics, projects } from "@/lib/data";
+import { getData } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "./section-header";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 import { CountUp } from "@/components/motion/count-up";
 import { TagCascade, TagItem } from "@/components/motion/tag-cascade";
+import { translations, type Locale } from "@/lib/i18n";
 
-export function Work() {
+export function Work({ locale }: { locale: Locale }) {
+  const t = translations[locale].work;
+  const { metrics, projects } = getData(locale);
+
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="work">
-      <SectionHeader number="03" label="Work" />
+      <SectionHeader number="03" label={t.sectionLabel} />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
-        Impact measured
+        {t.headline1}
         <br />
-        in real numbers.
+        {t.headline2}
       </h2>
       <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
-        Systems I&apos;ve built handle real money, real users, and real
-        regulatory complexity across Mexico, USA, Europe, and Dominican Republic.
+        {t.description}
       </p>
 
       {/* Metrics */}
@@ -45,7 +48,7 @@ export function Work() {
 
       {/* Projects */}
       <h3 className="mb-8 font-mono text-[11px] uppercase tracking-[3px] text-text-muted">
-        Selected Projects
+        {t.selectedProjects}
       </h3>
       <StaggerContainer className="flex flex-col gap-6">
         {projects.map((p) => (

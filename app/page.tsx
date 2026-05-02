@@ -1,64 +1,16 @@
-import { Navigation } from "@/components/sections/navigation";
-import { Hero } from "@/components/sections/hero";
-import { About } from "@/components/sections/about";
-import { Expertise } from "@/components/sections/expertise";
-import { Work } from "@/components/sections/work";
-import { Experience } from "@/components/sections/experience";
-import { Beyond } from "@/components/sections/beyond";
-import { BlogSection } from "@/components/blog/blog-section";
-import { Contact } from "@/components/sections/contact";
-import { Footer } from "@/components/sections/footer";
-import {
-  CursorGlow,
-  ActiveNavHighlight,
-  SectionScrollFade,
-} from "@/components/client-effects";
-import { GridParallax } from "@/components/motion/grid-parallax";
-import { LoadingScreen } from "@/components/loading-screen";
-import { LayoutGroup } from "@/components/motion/layout-group-wrapper";
-import { TerminalLoader } from "@/components/terminal/terminal-loader";
-function SectionDivider() {
-  return (
-    <div className="mx-auto max-w-[1400px] px-6 md:px-12">
-      <hr className="border-none h-px bg-border-subtle" />
-    </div>
-  );
-}
+import { redirect } from "next/navigation";
+import { cookies, headers } from "next/headers";
+import { LOCALES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
 
+export default async function RootPage() {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get("NEXT_LOCALE")?.value;
+  if (raw && LOCALES.includes(raw as Locale)) {
+    redirect(`/${raw as Locale}`);
+  }
 
-export default function Home() {
-  return (
-    <LayoutGroup>
-      <LoadingScreen />
-      <GridParallax />
-      <CursorGlow />
-      <ActiveNavHighlight />
-      <SectionScrollFade />
-
-      <Navigation />
-
-      <main>
-        <Hero />
-        <SectionDivider />
-        <About />
-        <SectionDivider />
-        <Expertise />
-        <SectionDivider />
-        <Work />
-        <SectionDivider />
-        <Experience />
-        <SectionDivider />
-        {/* <GitHubActivity /> */}
-        <SectionDivider />
-        <Beyond />
-        <SectionDivider />
-        <BlogSection />
-        <SectionDivider />
-        <Contact />
-      </main>
-
-      <Footer />
-      <TerminalLoader />
-    </LayoutGroup>
-  );
+  const headersList = await headers();
+  const acceptLang = headersList.get("accept-language") ?? "";
+  const locale: Locale = acceptLang.toLowerCase().includes("es") ? "es" : DEFAULT_LOCALE;
+  redirect(`/${locale}`);
 }

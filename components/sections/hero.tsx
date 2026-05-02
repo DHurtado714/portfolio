@@ -5,8 +5,11 @@ import { HeroEntrance, HeroItem } from "@/components/motion/hero-entrance";
 import { Typewriter } from "@/components/motion/typewriter";
 import { ShimmerText } from "@/components/motion/shimmer";
 import { HeroScene } from "@/components/motion/hero-scene";
+import { translations, type Locale } from "@/lib/i18n";
 
-export function Hero() {
+export function Hero({ locale }: { locale: Locale }) {
+  const t = translations[locale].hero;
+
   return (
     <ParallaxLayer>
       <section
@@ -26,7 +29,7 @@ export function Hero() {
           <HeroEntrance>
             <HeroItem>
               <div className="font-mono text-xs uppercase tracking-[4px] text-green">
-                <Typewriter text="Software Engineer — Backend · Fintech · ML" speed={35} startDelay={600} />
+                <Typewriter text={t.typewriter} speed={35} startDelay={600} />
               </div>
             </HeroItem>
 
@@ -43,10 +46,7 @@ export function Hero() {
 
             <HeroItem>
               <p className="mt-8 max-w-[540px] text-lg leading-[1.7] text-text-secondary">
-                Engineer obsessed with how things connect &mdash; from distributed
-                architectures to financial flows across borders. With 4+ years in
-                fintech and systems spanning 15+ countries, I build infrastructure
-                that moves money across borders.
+                {t.description}
               </p>
             </HeroItem>
 
@@ -56,14 +56,14 @@ export function Hero() {
                   asChild
                   className="h-auto w-full rounded-[10px] bg-green px-7 py-4 font-semibold text-[#050505] hover:-translate-y-0.5 hover:bg-green-light hover:shadow-[0_8px_24px_rgba(0,200,120,0.2)] sm:w-auto sm:py-3.5"
                 >
-                  <Link href="#work">View my work &darr;</Link>
+                  <Link href="#work">{t.viewWork}</Link>
                 </Button>
                 <Button
                   asChild
                   variant="ghost"
                   className="h-auto w-full rounded-[10px] border border-border-hover bg-transparent px-7 py-4 text-text-secondary hover:-translate-y-0.5 hover:border-text-muted hover:bg-transparent hover:text-foreground dark:hover:bg-transparent sm:w-auto sm:py-3.5"
                 >
-                  <Link href="#contact">Get in touch</Link>
+                  <Link href="#contact">{t.getInTouch}</Link>
                 </Button>
               </div>
             </HeroItem>
@@ -75,9 +75,9 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Scroll indicator — positioned relative to section, outside HeroEntrance */}
+        {/* Scroll indicator */}
         <div className="absolute bottom-10 left-6 hidden items-center gap-3 font-mono text-[10px] tracking-[2px] text-text-muted md:flex md:left-12">
-          <span>SCROLL</span>
+          <span>{t.scroll}</span>
           <div className="h-px w-10 animate-scroll-pulse bg-linear-to-r from-green to-transparent" />
         </div>
       </section>

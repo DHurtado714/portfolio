@@ -2,18 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getNavItems } from "@/lib/nav-items";
+import { translations, type Locale } from "@/lib/i18n";
 
-const navItems = [
-  { href: "/#about", label: "About" },
-  { href: "/#expertise", label: "Expertise" },
-  { href: "/#work", label: "Work" },
-  { href: "/#experience", label: "Experience" },
-  { href: "/blog", label: "Blog" },
-  { href: "/#contact", label: "Contact" },
-];
-
-export function MobileMenu() {
+export function MobileMenu({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState(false);
+  const navItems = getNavItems(locale);
+  const t = translations[locale].nav;
 
   useEffect(() => {
     const onResize = () => {
@@ -35,7 +30,7 @@ export function MobileMenu() {
       <button
         className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] md:hidden"
         onClick={() => setOpen(!open)}
-        aria-label={open ? "Close menu" : "Open menu"}
+        aria-label={open ? t.closeMenu : t.openMenu}
         aria-expanded={open}
       >
         <span
@@ -73,7 +68,7 @@ export function MobileMenu() {
 
         <div className="mt-auto px-6 pb-10 flex items-center gap-2 font-mono text-[11px] text-text-muted">
           <div className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot" />
-          <span>Shipping side projects</span>
+          <span>{t.shippingStatus}</span>
         </div>
       </div>
     </>

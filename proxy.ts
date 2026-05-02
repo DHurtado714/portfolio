@@ -17,6 +17,7 @@ export function proxy(request: NextRequest) {
   // Already has a valid locale prefix — set the cookie and pass through
   for (const locale of LOCALES) {
     if (
+      pathname === `/${locale}` ||
       pathname === `/${locale}/blog` ||
       pathname.startsWith(`/${locale}/blog/`)
     ) {
@@ -29,18 +30,24 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Bare /blog or /blog/* — detect locale and redirect
-  if (pathname === "/blog" || pathname.startsWith("/blog/")) {
+  // Root path or bare /blog — detect locale and redirect
+  if (pathname === "/" || pathname === "/blog" || pathname.startsWith("/blog/")) {
     const locale = detectLocale(request);
-    return NextResponse.redirect(
-      new URL(`/${locale}${pathname}`, request.url)
-    );
+    const target = pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/blog", "/blog/:path*", "/:locale/blog", "/:locale/blog/:path*"],
+  matcher: [
+    "/",
+    "/blog",
+    "/blog/:path*",
+    "/:locale",
+    "/:locale/blog",
+    "/:locale/blog/:path*",
+  ],
 };
 

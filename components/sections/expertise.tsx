@@ -1,23 +1,25 @@
-import { expertiseData } from "@/lib/data";
+import { getData } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeader } from "./section-header";
 import { StaggerContainer, StaggerItem } from "@/components/motion/stagger";
 import { HoverLiftCard } from "@/components/motion/hover-lift-card";
+import { translations, type Locale } from "@/lib/i18n";
 
-export function Expertise() {
+export function Expertise({ locale }: { locale: Locale }) {
+  const t = translations[locale].expertise;
+  const { expertiseData } = getData(locale);
+
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-[120px]" id="expertise">
-      <SectionHeader number="02" label="Expertise" />
+      <SectionHeader number="02" label={t.sectionLabel} />
       <h2 className="mb-5 font-heading text-[clamp(32px,4vw,52px)] leading-[1.1] font-extrabold tracking-[-2px]">
-        What I bring
+        {t.headline1}
         <br />
-        to the table.
+        {t.headline2}
       </h2>
       <p className="mb-16 max-w-[560px] text-[17px] leading-[1.7] text-text-secondary">
-        Deep backend expertise with a full-stack perspective. I don&apos;t just
-        write endpoints &mdash; I design the systems that make products
-        possible.
+        {t.description}
       </p>
 
       <StaggerContainer className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">

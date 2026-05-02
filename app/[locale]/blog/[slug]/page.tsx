@@ -5,7 +5,7 @@ import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { getAllPosts, getPostBySlug } from "@/lib/content";
-import { isValidLocale, LOCALES } from "@/lib/i18n";
+import { isValidLocale, LOCALES, type Locale } from "@/lib/i18n";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import { ArticleLayout } from "@/components/blog/article-layout";
 import { Navigation } from "@/components/sections/navigation";
@@ -73,7 +73,7 @@ export default async function BlogPostPage({
 
   return (
     <>
-      <Navigation />
+      <Navigation locale={locale as Locale} />
       <main>
         <ArticleLayout post={post} locale={locale}>
           <MDXRemote
@@ -94,7 +94,7 @@ export default async function BlogPostPage({
           />
         </ArticleLayout>
       </main>
-      <Footer />
+      <Footer locale={locale as Locale} />
     </>
   );
 }
