@@ -1,0 +1,279 @@
+---
+title: "Idempotency in Payments: How to Avoid Your API Moving Money Twice"
+description: "Why idempotency is not a technical detail in fintech, and how to design a system that withstands production reality."
+date: "2026-05-01"
+author: "Daniel"
+tags:
+  [
+    "payments",
+    "fintech",
+    "idempotency",
+    "backend",
+    "postgresql",
+    "api-design",
+  ]
+published: true
+---
+
+> Why idempotency is not a technical detail in fintech, and how to design a system that withstands production reality.
+
+---
+
+## The Problem Most People Underestimate
+
+When you're building an API that moves money, the main enemy isn't the obvious bug. It's the **duplicate request**.
+
+And I'm not talking about a malicious user trying to exploit your system. I'm talking about things that happen EVERY day in production:
+
+- An SDK with automatic retry policy that retries when the first request times out
+- A mobile user who double-taps "Confirm" before the button gets disabled
+- A network switch from WiFi to 4G right when the server is responding
+- A load balancer (ALB, NLB) that retries to another target after an upstream timeout
+- A message queue that delivers the same message twice because its guarantee is **at-least-once**, not exactly-once
+- Frontend state that doesn't reflect an already-completed transaction and the user initiates another one
+
+Any of these, without protection, **doubles the transaction**.
+
+In a system processing serious volumes, a duplicate transaction means duplicate money movement. Unlike read operations, financial writes are **irreversible once they settle**. There's no `Ctrl+Z` after the bank confirms the transfer.
+
+That's why idempotency in fintech is not a "best practice". It's the first line of defense against an event that can cost millions and customer trust.
+
+---
+
+## What is Idempotency (in Practical Terms)
+
+An operation is idempotent when executing it N times produces the same result as executing it once.
+
+`GET /transactions/123` is naturally idempotent. `POST /transactions` is not—each request creates a new resource.
+
+The **idempotency key pattern** (standardized by Stripe and adopted across the fintech industry) turns a non-idempotent POST into an idempotent one, using a unique identifier per logical operation that the client sends in a header:
+
+```http
+POST /v1/transactions
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+```
+
+If the client retries with the **same key**, the server recognizes the operation, doesn't execute it again, and returns the same response as the original request.
+
+It sounds simple. Getting the implementation right is not.
+
+---
+
+## Error #1: SELECT-then-INSERT
+
+The naive implementation is:
+
+```typescript
+// ❌ BROKEN: race condition guaranteed
+const existing = await db.idempotencyKey.findOne({ key, userId });
+if (existing) return existing.response;
+
+const result = await processTransaction(payload);
+await db.idempotencyKey.insert({ key, userId, response: result });
+```
+
+This **doesn't work** under concurrency. Two requests arriving at the same time can both pass the `SELECT` (because neither has inserted yet), both execute the transaction, and both try to insert at the end. Result: two real transactions, not one.
+
+The correct way is to invert the order: **try the atomic INSERT first, and catch the UNIQUE constraint violation**.
+
+```typescript
+// ✅ CORRECT: atomic register, catch on conflict
+try {
+  const record = await db.idempotencyKey.insert({
+    key, userId, status: 'PROCESSING', requestHash, lockedAt: new Date()
+  });
+  // Only this request won the race
+  return await executeAndStore(record.id);
+} catch (error) {
+  if (error.code === '23505') { // PostgreSQL unique_violation
+    // Another request already registered this key — handle it
+    return handleExistingKey(key, userId, requestHash);
+  }
+  throw error;
+}
+```
+
+PostgreSQL guarantees that only one request wins the INSERT. The others receive error 23505 and enter the duplicate handling flow.
+
+---
+
+## The Database Schema
+
+```sql
+CREATE TABLE idempotency_keys (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Identity
+  idempotency_key VARCHAR(255) NOT NULL,
+  user_id         UUID NOT NULL,
+
+  -- Request fingerprint
+  request_path    VARCHAR(500) NOT NULL,
+  request_hash    VARCHAR(64)  NOT NULL,    -- SHA-256 of normalized body
+
+  -- Lifecycle
+  status          VARCHAR(20)  NOT NULL DEFAULT 'PROCESSING',
+
+  -- Stored response for replay
+  response_code   INT,
+  response_body   JSONB,
+
+  -- Reference to created resource
+  resource_id     UUID,
+  resource_type   VARCHAR(100),
+
+  -- Locking
+  locked_at       TIMESTAMPTZ,
+  expires_at      TIMESTAMPTZ NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  CONSTRAINT uq_idempotency_user_key
+    UNIQUE (user_id, idempotency_key)
+);
+
+CREATE INDEX idx_idempotency_expires
+  ON idempotency_keys (expires_at)
+  WHERE status != 'PROCESSING';
+```
+
+Three key decisions:
+
+1. **The UNIQUE constraint is `(user_id, idempotency_key)`**, not just `idempotency_key`. Different users can generate the same UUID by chance—scoping by user avoids false positives.
+
+2. **`request_hash` is SHA-256 of the normalized body** (with keys sorted alphabetically). This detects when the client reuses a key with a different payload—which is a client bug that needs to be reported, not hidden with an incorrect replay.
+
+3. **`response_body` is JSONB** because we need to return to the client exactly the same response as the original, even if the client retries hours later.
+
+---
+
+## The Lifecycle of an Idempotency Record
+
+```
+PROCESSING ──────────> COMPLETED    (handler successful, response stored)
+    |
+    └─────────────────> FAILED       (retriable error, lock released)
+                         |
+                         └───> PROCESSING   (retry: re-acquire lock)
+                                   |
+                                   └───> COMPLETED
+```
+
+**The lock with timeout is critical.** If a request acquires the lock (`status=PROCESSING`) but never completes—the process dies from OOM, the container restarts, whatever—the `locked_at` allows subsequent requests to re-acquire the lock after a timeout (a good default is 30 seconds).
+
+Without this, the system enters permanent deadlock: the key exists in `PROCESSING` forever, and all client retries receive 409 Conflict eternally.
+
+---
+
+## Where to Implement It in Your Stack
+
+Regardless of which framework you use, this logic **shouldn't live inside your controllers or business handlers**. It's a concern of the transport layer, not the domain.
+
+The correct way to implement it:
+
+- In Express/Koa/Fastify-type frameworks: **middleware**
+- In frameworks with interceptors or filters (Spring, .NET, frameworks that support AOP): **interceptor**
+- In APIs with an API gateway: part of the **gateway logic** before reaching the service
+
+There's only one quality criterion: your controllers shouldn't know idempotency exists. They only declare that the endpoint requires it (via decorator, annotation, router configuration) and the infrastructure handles the rest.
+
+If idempotency logic is leaking into business logic, the abstraction is wrong.
+
+---
+
+## The Request Flow, Step by Step
+
+When a request arrives with `Idempotency-Key`, the correct flow is:
+
+1. **Validate the header.** If it's missing or has invalid format, reject before processing anything.
+2. **Calculate the body hash** (SHA-256 of normalized JSON with sorted keys).
+3. **Try the atomic INSERT** with status `PROCESSING`.
+4. **If the INSERT succeeds** → execute the business handler, store the response, mark as `COMPLETED`.
+5. **If the INSERT fails with UNIQUE violation** → query the existing record and branch:
+   - Different body hash → return `422 Unprocessable Entity`
+   - Status `COMPLETED` → return the stored response (exact replay)
+   - Status `PROCESSING` with active lock → return `409 Conflict`
+   - Status `PROCESSING` with expired lock or `FAILED` → re-acquire lock atomically and retry
+
+Step #5 is where a toy implementation differs from a production one. Most tutorials stop at "if it exists, return the response". Reality has four distinct scenarios, each with its own correct behavior.
+
+---
+
+## Defense in Depth: Why One Layer Isn't Enough
+
+This is what took me the longest to understand at first. Having idempotency keys is the first line, but not the only one.
+
+| Layer | What It Catches | Mechanism |
+|------|-----------|-----------|
+| Idempotency Key (header) | Client retries, accidental replays | Atomic UNIQUE on `idempotency_keys` |
+| Request Hash | Reuse of key with different payload | SHA-256 of body, mismatch = 422 |
+| Lock with Timeout | Requests that die mid-processing | `locked_at` + 30s timeout |
+| Status Machine | Replay of completed key | Returns stored response without re-executing |
+| Transaction Dedup Index | Last safety net if everything above fails | UNIQUE on `(user, currencies, amount, time_bucket)` |
+| Entity State Machine | Invalid transitions | Map of valid transitions in the aggregate |
+
+The **dedup index at the transaction table level** is the final safety net:
+
+```sql
+CREATE UNIQUE INDEX uq_transaction_dedup
+  ON transactions (
+    user_id,
+    source_currency,
+    target_currency,
+    amount,
+    date_trunc('minute', created_at)
+  )
+  WHERE status NOT IN ('CANCELLED', 'FAILED');
+```
+
+If for some reason the idempotency flow is bypassed (a new endpoint that forgot to apply the guard, an edge code path, a migration that didn't consider this case), the DB-level constraint prevents the duplicate at the end of the pipeline.
+
+It's coarse—a one-minute bucket—but it's exactly what you need: an intentionally wide net that catches what falls through the finer nets above.
+
+---
+
+## Anti-patterns I Learned by Avoiding
+
+Some mistakes I saw (or made) that are worth noting:
+
+**Never use SELECT-then-INSERT.** I already covered it, but it's worth repeating. It's the most common bug.
+
+**Never store idempotency state only in Redis or memory.** PostgreSQL is the source of truth. Cache for performance if needed, but writes go to the DB first.
+
+**Never let keys live forever.** Without TTL + cleanup, the table grows unbounded and indexes degrade. 48 hours is a good default—it covers weekends and late retries.
+
+**Never skip the request hash check.** A key reused with a different body is a client bug, not something that should be hidden.
+
+**Never put idempotency logic inside business handlers.** The transport layer owns this. If it's leaking, the abstraction is wrong.
+
+**Never mark business validation errors (4xx) as FAILED.** They're not retriable. Store them as COMPLETED with the error response, so retries don't enter an infinite loop.
+
+**Never rely solely on message queue dedup.** Message-level dedup usually has short windows (5 minutes in SQS) and different semantics. Your database is the source of truth.
+
+---
+
+## Design Decisions and Why
+
+| Decision | Reason |
+|----------|-------|
+| PostgreSQL over Redis | Source of truth must survive restarts. ACID for financial operations. |
+| 48-hour TTL | Covers weekend retry windows. Shorter risks premature expiration. |
+| 30s lock timeout | P99 of transaction creation is usually under 10s. 3x buffer for safety. |
+| Body hash | Detects key reuse with different parameters. Normalized JSON avoids false mismatches. |
+| Transport layer over domain | Domain shouldn't know idempotency exists. It's separation of concerns. |
+| `(user_id, key)` as UNIQUE | Different users can generate the same UUID by chance. |
+
+---
+
+## Closing
+
+Idempotency in payments is not an implementation detail. It's **the line between a reliable system and one that one day will double a settlement and you'll lose a customer who never comes back**.
+
+And most technical blogs cover the theory—the Stripe pattern, expected HTTP status codes—but not the things that matter in production: the lock with timeout to survive crashes, the body hash to detect client bugs, the defense-in-depth layers that save you when one of them fails.
+
+If you're building a payments system, don't implement this at the end. Design it from day one. It costs more to retrofit it after a duplicate in production makes you rewrite half the architecture.
+
+I keep learning. But this I have clear: in fintech, idempotency is the guard that decides whether your system is serious or not.
+
+---
+
+*If you want to see more of what I'm building: [danih.dev](https://danih.dev)*
