@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ImageZoom } from "@/components/blog/image-zoom";
 
 type MdxImageProps = {
   src: string;
@@ -6,6 +7,7 @@ type MdxImageProps = {
   caption?: string;
   width?: number;
   height?: number;
+  zoom?: boolean;
 };
 
 export function MdxImage({
@@ -14,18 +16,21 @@ export function MdxImage({
   caption,
   width = 1280,
   height = 720,
+  zoom = true,
 }: MdxImageProps) {
   const image = (
-    <Image
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      sizes="(max-width: 768px) 100vw, 720px"
-      loading="lazy"
-      className={caption ? "w-full rounded-xl" : "my-8 w-full rounded-xl"}
-      style={{ width: "100%", height: "auto" }}
-    />
+    <ImageZoom enabled={zoom}>
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        sizes="(max-width: 768px) 100vw, 720px"
+        loading="lazy"
+        className={caption ? "w-full rounded-xl" : "my-8 w-full rounded-xl"}
+        style={{ width: "100%", height: "auto" }}
+      />
+    </ImageZoom>
   );
 
   if (caption) {
