@@ -4,6 +4,8 @@ import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import type { BlogPost } from "@/lib/content";
 import { type Locale, translations } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { extractToc } from "@/lib/toc";
+import { TableOfContents } from "@/components/blog/table-of-contents";
 
 export function ArticleLayout({
   post,
@@ -16,6 +18,7 @@ export function ArticleLayout({
 }) {
   const t = translations[locale].blog;
   const dateLocale = locale === "es" ? "es-ES" : "en-US";
+  const toc = extractToc(post.content);
 
   const formattedDate = new Date(post.date).toLocaleDateString(dateLocale, {
     year: "numeric",
@@ -79,6 +82,8 @@ export function ArticleLayout({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+
+      <TableOfContents items={toc} label={t.onThisPage} />
 
       <article className="mx-auto max-w-[720px] px-5 pt-32 pb-20 md:px-0">
         <div className="mb-12 flex items-center justify-between">
