@@ -2,6 +2,8 @@ import type { MDXComponents } from "mdx/types";
 import { Callout } from "@/components/ui/callout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MdxImage } from "@/components/blog/mdx-image";
+import { Gallery } from "@/components/blog/gallery";
+import { Video } from "@/components/blog/video";
 
 export const mdxComponents: MDXComponents = {
   Callout,
@@ -10,6 +12,8 @@ export const mdxComponents: MDXComponents = {
   TabsList,
   TabsTrigger,
   Image: MdxImage,
+  Gallery,
+  Video,
   h1: (props) => (
     <h1
       className="mb-6 mt-12 font-heading text-[38px] font-extrabold leading-[1.1] tracking-[-2px]"
