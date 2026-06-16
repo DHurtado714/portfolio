@@ -1,0 +1,236 @@
+---
+title: "Information Agents: the end of reactive search (and how they're built)"
+description: "Google brought information agents to Search at I/O 2026: always-on assistants that monitor topics in the background and notify you on their own. How the architecture works under the hood, and what it means for those of us building software."
+date: "2026-06-15"
+author: "Daniel"
+tags:
+  [
+    "ai",
+    "agents",
+    "search",
+    "architecture",
+    "rag",
+    "system-design",
+  ]
+published: true
+---
+
+# Information Agents: the end of reactive search
+
+For 25 years search worked the same way: you have a question, you type a query, you get a list of links, and you do the work of filtering. A **reactive** model — information sits still until you go get it.
+
+At I/O 2026, Google introduced **information agents**: always-on assistants that run in the background around the clock, monitor the topics you care about, and push synthesized updates to your device. We went from "I search" to "information searches for me."
+
+This post isn't about the announcement. It's about **how a system like this is built** under the hood, because the architecture is more interesting than the headline — and because anyone building agents in production will run into these same design problems.
+
+<Callout type="info">
+  **TL;DR:** An information agent is a continuous monitoring loop with five layers:
+  perception (crawl + embeddings), memory (vector store), reasoning (LLM + RAG),
+  planning (significance threshold) and orchestration (tools + governance). The real
+  challenge isn't the model — it's deciding *when* it's worth interrupting the user.
+</Callout>
+
+---
+
+## Table of contents
+
+1. [Reactive vs proactive](#reactive-vs-proactive)
+2. [The five-layer architecture](#the-five-layer-architecture)
+3. [The hard problem: the significance threshold](#the-hard-problem-the-significance-threshold)
+4. [Governance: an agent with credentials is an attack surface](#governance-an-agent-with-credentials-is-an-attack-surface)
+5. [What it means for those of us building software](#what-it-means-for-those-of-us-building-software)
+
+---
+
+## Reactive vs proactive
+
+The difference isn't cosmetic. It changes the entire execution model.
+
+| | Reactive search | Information agent |
+| --- | --- | --- |
+| Trigger | User query | Change in a monitored source |
+| Execution | Request/response, ephemeral | Continuous loop, persistent |
+| State | Stateless | Keeps memory of the user and what it has seen |
+| Cost | Per query | Per unit of time (always running) |
+| Design challenge | Result ranking | Deciding when to notify |
+
+A classic search engine is a pure function: `query -> results`. An information agent is a **long-running process** with state, that observes the world and decides to act. It's the difference between an HTTP endpoint and a daemon.
+
+---
+
+## The five-layer architecture
+
+Under the hood, these systems break down into five layers working in a loop.
+
+### 1. Perception — crawl, index, embed
+
+The agent observes designated sources (the open web, a corporate knowledge base, real-time feeds). It crawls, indexes, and extracts **semantic embeddings** from each new piece of content.
+
+```typescript
+// Perception pipeline (simplified)
+async function perceive(source: Source): Promise<Observation[]> {
+  const documents = await crawl(source);          // fetch new content
+  const chunks = documents.flatMap(splitIntoChunks);
+  return Promise.all(
+    chunks.map(async (chunk) => ({
+      chunk,
+      embedding: await embed(chunk.text),          // semantic vector
+      observedAt: new Date(),
+    })),
+  );
+}
+```
+
+The key point: it doesn't store plain text to compare strings. It stores **vectors**, so it can ask "is this semantically close to what the user cares about?" instead of "does this contain this keyword?".
+
+### 2. Memory — the vector store
+
+Embeddings go into a vector store that supports similarity search. This is the agent's memory: what it has already seen, and the user's interests represented as vectors too.
+
+```sql
+-- With pgvector, the agent's memory is just another table
+CREATE TABLE observations (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL,
+  source_id    UUID NOT NULL,
+  content      TEXT NOT NULL,
+  embedding    VECTOR(1536) NOT NULL,
+  observed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  -- avoid re-notifying the same thing
+  content_hash VARCHAR(64) NOT NULL,
+  CONSTRAINT uq_user_content UNIQUE (user_id, content_hash)
+);
+
+CREATE INDEX idx_observations_embedding
+  ON observations USING ivfflat (embedding vector_cosine_ops);
+```
+
+That `UNIQUE (user_id, content_hash)` isn't decoration. It's the first line of defense against the worst bug of a proactive agent: **notifying the same thing twice**. If that sounds like idempotency in payments, it's the exact same problem wearing a different costume.
+
+### 3. Reasoning — LLM + RAG
+
+When a new observation arrives, a reasoning engine (an LLM with retrieval-augmented generation) interprets it against the user's declared goals, ranks relevance, and composes a concise, context-aware summary.
+
+```typescript
+async function reason(obs: Observation, userGoals: Goal[]): Promise<Assessment> {
+  // Retrieve relevant user context from the vector store
+  const context = await vectorStore.similaritySearch(obs.embedding, { k: 5 });
+
+  const assessment = await llm.complete({
+    system: "Assess whether this observation is relevant and novel for the user's goals.",
+    context: [...userGoals, ...context],
+    input: obs.content,
+  });
+
+  return {
+    relevanceScore: assessment.score,   // 0..1
+    summary: assessment.summary,
+    isNovel: assessment.isNovel,        // does it add something the user doesn't already know?
+  };
+}
+```
+
+### 4. Planning — the threshold
+
+This is the heart of the system, and I'm giving it its own section next because it's the genuinely hard problem.
+
+### 5. Orchestration — tools and governance
+
+The layer that coordinates tool use (APIs, browsers, internal services) and **enforces governance policies**: permission checks, logging, kill-switches. Once a change clears the threshold, the agent pushes the synthesized notification to the user's device via native push.
+
+---
+
+## The hard problem: the significance threshold
+
+The smartest model in the world is useless if the agent interrupts you 40 times a day. The metric that defines whether an information agent is usable isn't summary quality — it's the **precision of when it decides to speak**.
+
+This is a design problem, not a model problem. The naive implementation is a fixed threshold:
+
+```typescript
+// ❌ NAIVE: fixed threshold
+if (assessment.relevanceScore > 0.8) {
+  await notify(user, assessment.summary);
+}
+```
+
+It fails on both ends. If the threshold is too high, the agent misses important things and the user stops trusting it. If it's too low, it floods, and the user mutes notifications — which is the death of the product.
+
+The correct approach combines relevance, novelty, and the user's **attention budget**:
+
+```typescript
+// ✅ BETTER: decision with an attention budget
+function shouldNotify(a: Assessment, budget: AttentionBudget): boolean {
+  if (!a.isNovel) return false;                  // never repeat
+  if (a.relevanceScore < budget.minRelevance) return false;
+
+  // If we've already notified a lot today, raise the bar dynamically
+  const adjustedThreshold =
+    budget.baseThreshold + budget.notificationsToday * budget.fatiguePenalty;
+
+  return a.relevanceScore >= adjustedThreshold;
+}
+```
+
+The concept of an **attention budget** — treating the user's attention as a finite resource that depletes — is what separates an agent people keep on from one they mute in the first week.
+
+<Callout type="warning">
+  The temptation is to optimize recall ("don't let anything slip"). In a proactive system,
+  optimizing **precision** matters more: an irrelevant notification costs far more than a
+  missed relevant one, because it erodes trust in every future notification.
+</Callout>
+
+---
+
+## Governance: an agent with credentials is an attack surface
+
+A corporate information agent doesn't just read the public web. It touches internal knowledge bases, APIs, sometimes sensitive data. And it runs autonomously. That changes the security model entirely.
+
+Three things that stop being optional:
+
+1. **The agent's own identity.** The agent shouldn't run with your credentials. It needs its own identity, with least-privilege permissions. 2026 reports already warn that non-human identities will soon outnumber humans inside organizations — each one is a new attack surface.
+
+2. **A complete audit trail.** Every observation, every decision to notify, every tool call has to be logged. An agent that makes decisions without traceability is impossible to debug and to audit.
+
+3. **A kill-switch.** There has to be a way to shut the agent down instantly. An autonomous process you can't stop isn't a feature, it's an incident waiting to happen.
+
+```typescript
+// Every agent action goes through the same gate
+async function executeAction(agent: Agent, action: Action): Promise<Result> {
+  if (await killSwitch.isTripped(agent.id)) {
+    throw new AgentHaltedError(agent.id);
+  }
+  await audit.log({ agentId: agent.id, action, at: new Date() });
+
+  if (!permissions.allows(agent.identity, action)) {
+    await audit.log({ agentId: agent.id, action, denied: true });
+    throw new PermissionDeniedError(action);
+  }
+
+  return action.execute();
+}
+```
+
+If this reminds you of how you design a payment system — explicit permissions, everything audited, deny by default — it's because the discipline is the same. An autonomous agent moving information deserves the same rigor as an endpoint moving money.
+
+---
+
+## What it means for those of us building software
+
+It's easy to see information agents as just another consumer feature. But the pattern —an autonomous loop that observes, reasons, and acts under governance— is the same one you'll build the next time someone asks for "have the system tell me when something important happens."
+
+The pieces are already within reach:
+
+| Layer | Practical tool |
+| --- | --- |
+| Perception | A crawler/poller + an embeddings model |
+| Memory | pgvector, or a dedicated vector store |
+| Reasoning | Any LLM with RAG |
+| Planning | Your threshold logic (the part that actually matters) |
+| Orchestration | Your tools layer + permissions + audit |
+
+The model isn't the differentiator — it's commoditized. The differentiator is the **system design** around it: when to notify, how not to repeat, how not to flood, how to audit, how to shut down.
+
+It's not magic. It's system design. And like every new tool, it's going to split people in two: those who understand how it's built and bend it to their advantage, and those who just watch the notification appear.
+
+The question isn't whether you'll build agents like this. It's whether you'll design the guardrails before you turn them on.
