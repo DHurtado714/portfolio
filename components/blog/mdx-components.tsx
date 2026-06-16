@@ -1,6 +1,7 @@
 import type { MDXComponents } from "mdx/types";
 import { Callout } from "@/components/ui/callout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FullBleed, Wide } from "@/components/blog/full-bleed";
 import { Embed } from "@/components/blog/embed";
 import { MdxImage } from "@/components/blog/mdx-image";
 
@@ -11,6 +12,8 @@ export const mdxComponents: MDXComponents = {
   TabsContent,
   TabsList,
   TabsTrigger,
+  FullBleed,
+  Wide,
   Image: MdxImage,
   h1: (props) => (
     <h1
