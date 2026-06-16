@@ -1,6 +1,7 @@
 import type { MDXComponents } from "mdx/types";
 import { Callout } from "@/components/ui/callout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MdxImage } from "@/components/blog/mdx-image";
 
 export const mdxComponents: MDXComponents = {
   Callout,
@@ -8,6 +9,7 @@ export const mdxComponents: MDXComponents = {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Image: MdxImage,
   h1: (props) => (
     <h1
       className="mb-6 mt-12 font-heading text-[38px] font-extrabold leading-[1.1] tracking-[-2px]"
@@ -72,10 +74,7 @@ export const mdxComponents: MDXComponents = {
     />
   ),
   hr: () => <hr className="my-10 border-none h-px bg-border-subtle" />,
-  img: (props) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className="my-8 rounded-xl" alt={props.alt ?? ""} {...props} />
-  ),
+  img: (props) => <MdxImage src={props.src ?? ""} alt={props.alt ?? ""} />,
   table: (props) => (
     <div className="mb-6 overflow-x-auto">
       <table
