@@ -1,10 +1,12 @@
 import type { MDXComponents } from "mdx/types";
 import { Callout } from "@/components/ui/callout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Embed } from "@/components/blog/embed";
 import { MdxImage } from "@/components/blog/mdx-image";
 
 export const mdxComponents: MDXComponents = {
   Callout,
+  Embed,
   Tabs,
   TabsContent,
   TabsList,
