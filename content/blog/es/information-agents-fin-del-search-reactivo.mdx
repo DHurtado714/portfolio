@@ -1,0 +1,236 @@
+---
+title: "Information Agents: el fin del search reactivo (y cómo están construidos)"
+description: "Google llevó los information agents a Search en I/O 2026: asistentes always-on que monitorean temas en background y te avisan solos. Cómo funciona su arquitectura por dentro y qué significa para los que construimos software."
+date: "2026-06-15"
+author: "Daniel"
+tags:
+  [
+    "ai",
+    "agents",
+    "search",
+    "architecture",
+    "rag",
+    "system-design",
+  ]
+published: true
+---
+
+# Information Agents: el fin del search reactivo
+
+Durante 25 años el buscador funcionó igual: tú tienes una duda, escribes una query, recibes una lista de links, y tú haces el trabajo de filtrar. Un modelo **reactivo** — la información se queda quieta hasta que tú vas a buscarla.
+
+En I/O 2026, Google presentó los **information agents**: asistentes always-on que corren en background las 24 horas, monitorean los temas que te importan, y te envían actualizaciones sintetizadas vía push notification. Pasamos de "yo busco" a "la información me busca".
+
+Este post no es sobre el anuncio. Es sobre **cómo está construido** un sistema así por dentro, porque la arquitectura es más interesante que el titular — y porque cualquiera que esté construyendo agentes en producción se va a topar con estos mismos problemas de diseño.
+
+<Callout type="info">
+  **TL;DR:** Un information agent es un loop de monitoreo continuo con cinco capas:
+  percepción (crawl + embeddings), memoria (vector store), razonamiento (LLM + RAG),
+  planning (threshold de relevancia) y orquestación (tools + governance). El reto real
+  no es el modelo — es decidir *cuándo* vale la pena interrumpir al usuario.
+</Callout>
+
+---
+
+## Tabla de contenidos
+
+1. [Reactivo vs proactivo](#reactivo-vs-proactivo)
+2. [La arquitectura de cinco capas](#la-arquitectura-de-cinco-capas)
+3. [El problema difícil: el threshold de significancia](#el-problema-difícil-el-threshold-de-significancia)
+4. [Governance: el agente con credenciales es una superficie de ataque](#governance-el-agente-con-credenciales-es-una-superficie-de-ataque)
+5. [Qué significa para los que construimos software](#qué-significa-para-los-que-construimos-software)
+
+---
+
+## Reactivo vs proactivo
+
+La diferencia no es cosmética. Cambia el modelo de ejecución completo.
+
+| | Search reactivo | Information agent |
+| --- | --- | --- |
+| Trigger | Query del usuario | Cambio en una fuente monitoreada |
+| Ejecución | Request/response, efímera | Loop continuo, persistente |
+| Estado | Stateless | Mantiene memoria del usuario y de lo ya visto |
+| Costo | Por query | Por unidad de tiempo (siempre corriendo) |
+| Reto de diseño | Ranking de resultados | Decidir cuándo notificar |
+
+Un buscador clásico es una función pura: `query -> resultados`. Un information agent es un **proceso de larga duración** con estado, que observa el mundo y decide actuar. Es la diferencia entre un endpoint HTTP y un daemon.
+
+---
+
+## La arquitectura de cinco capas
+
+Por dentro, estos sistemas se descomponen en cinco capas que trabajan en loop.
+
+### 1. Percepción — crawl, index, embed
+
+El agente observa fuentes designadas (la web abierta, una knowledge base corporativa, feeds en tiempo real). Crawlea, indexa y extrae **embeddings semánticos** de cada pieza de contenido nuevo.
+
+```typescript
+// Pipeline de percepción (simplificado)
+async function perceive(source: Source): Promise<Observation[]> {
+  const documents = await crawl(source);          // fetch contenido nuevo
+  const chunks = documents.flatMap(splitIntoChunks);
+  return Promise.all(
+    chunks.map(async (chunk) => ({
+      chunk,
+      embedding: await embed(chunk.text),          // vector semántico
+      observedAt: new Date(),
+    })),
+  );
+}
+```
+
+El punto clave: no guarda texto plano para comparar strings. Guarda **vectores** para poder preguntar "¿esto es semánticamente parecido a lo que le importa al usuario?" en vez de "¿contiene esta keyword?".
+
+### 2. Memoria — el vector store
+
+Los embeddings van a un vector store que permite búsqueda por similaridad. Esta es la memoria del agente: lo que ya vio, y los intereses del usuario representados también como vectores.
+
+```sql
+-- Con pgvector, la memoria del agente es una tabla más
+CREATE TABLE observations (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL,
+  source_id    UUID NOT NULL,
+  content      TEXT NOT NULL,
+  embedding    VECTOR(1536) NOT NULL,
+  observed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  -- evita re-notificar lo mismo
+  content_hash VARCHAR(64) NOT NULL,
+  CONSTRAINT uq_user_content UNIQUE (user_id, content_hash)
+);
+
+CREATE INDEX idx_observations_embedding
+  ON observations USING ivfflat (embedding vector_cosine_ops);
+```
+
+Ese `UNIQUE (user_id, content_hash)` no es decoración. Es la primera línea de defensa contra el peor bug de un agente proactivo: **notificar dos veces la misma cosa**. Si esto te suena a la idempotencia en payments, es exactamente el mismo problema con otro disfraz.
+
+### 3. Razonamiento — LLM + RAG
+
+Cuando llega una observación nueva, un reasoning engine (un LLM con retrieval-augmented generation) la interpreta contra los goals declarados del usuario, rankea relevancia y compone un resumen conciso y con contexto.
+
+```typescript
+async function reason(obs: Observation, userGoals: Goal[]): Promise<Assessment> {
+  // Recupera el contexto relevante del usuario desde el vector store
+  const context = await vectorStore.similaritySearch(obs.embedding, { k: 5 });
+
+  const assessment = await llm.complete({
+    system: "Evalúa si esta observación es relevante y novedosa para los goals del usuario.",
+    context: [...userGoals, ...context],
+    input: obs.content,
+  });
+
+  return {
+    relevanceScore: assessment.score,   // 0..1
+    summary: assessment.summary,
+    isNovel: assessment.isNovel,        // ¿aporta algo que el usuario no sepa ya?
+  };
+}
+```
+
+### 4. Planning — el threshold
+
+Aquí está el corazón del sistema, y le dedico la sección siguiente porque es el problema difícil de verdad.
+
+### 5. Orquestación — tools y governance
+
+La capa que coordina el uso de herramientas (APIs, browsers, servicios internos) y **aplica las políticas de governance**: permission checks, logging, kill-switches. Una vez que un cambio supera el threshold, el agente empuja la notificación sintetizada al dispositivo del usuario vía push nativo.
+
+---
+
+## El problema difícil: el threshold de significancia
+
+El modelo más inteligente del mundo no sirve de nada si el agente te interrumpe 40 veces al día. La métrica que define si un information agent es usable no es la calidad del resumen — es la **precisión de cuándo decide hablar**.
+
+Esto es un problema de diseño, no de modelo. La implementación naive es un threshold fijo:
+
+```typescript
+// ❌ INGENUO: threshold fijo
+if (assessment.relevanceScore > 0.8) {
+  await notify(user, assessment.summary);
+}
+```
+
+Falla por dos lados. Si el threshold es muy alto, el agente se pierde cosas importantes y el usuario deja de confiar. Si es muy bajo, satura y el usuario silencia las notificaciones — que es la muerte del producto.
+
+La forma correcta combina relevancia, novedad y **presupuesto de atención** del usuario:
+
+```typescript
+// ✅ MEJOR: decisión con presupuesto de atención
+function shouldNotify(a: Assessment, budget: AttentionBudget): boolean {
+  if (!a.isNovel) return false;                  // nunca repitas
+  if (a.relevanceScore < budget.minRelevance) return false;
+
+  // Si ya notificamos mucho hoy, sube el listón dinámicamente
+  const adjustedThreshold =
+    budget.baseThreshold + budget.notificationsToday * budget.fatiguePenalty;
+
+  return a.relevanceScore >= adjustedThreshold;
+}
+```
+
+El concepto de **attention budget** — tratar la atención del usuario como un recurso finito que se agota — es lo que separa un agente que la gente mantiene encendido de uno que silencian en la primera semana.
+
+<Callout type="warning">
+  La tentación es optimizar el recall ("que no se le escape nada"). En un sistema
+  proactivo, optimizar la **precisión** importa más: una notificación irrelevante cuesta
+  mucho más que una relevante perdida, porque erosiona la confianza en todas las futuras.
+</Callout>
+
+---
+
+## Governance: el agente con credenciales es una superficie de ataque
+
+Un information agent corporativo no lee solo la web pública. Toca knowledge bases internas, APIs, a veces datos sensibles. Y corre de forma autónoma. Eso cambia el modelo de seguridad por completo.
+
+Tres cosas que dejan de ser opcionales:
+
+1. **Identidad propia del agente.** El agente no debería correr con tus credenciales. Necesita su propia identidad, con permisos mínimos. Los reportes de 2026 ya advierten que las identidades no-humanas pronto van a superar a los humanos dentro de las organizaciones — cada una es una superficie de ataque nueva.
+
+2. **Audit trail completo.** Cada observación, cada decisión de notificar, cada tool call tiene que quedar registrada. Un agente que toma decisiones sin trazabilidad es imposible de debuggear y de auditar.
+
+3. **Kill-switch.** Tiene que existir una forma de apagar el agente al instante. Un proceso autónomo que no puedes detener no es un feature, es un incidente esperando a pasar.
+
+```typescript
+// Toda acción del agente pasa por el mismo gate
+async function executeAction(agent: Agent, action: Action): Promise<Result> {
+  if (await killSwitch.isTripped(agent.id)) {
+    throw new AgentHaltedError(agent.id);
+  }
+  await audit.log({ agentId: agent.id, action, at: new Date() });
+
+  if (!permissions.allows(agent.identity, action)) {
+    await audit.log({ agentId: agent.id, action, denied: true });
+    throw new PermissionDeniedError(action);
+  }
+
+  return action.execute();
+}
+```
+
+Si esto te recuerda a cómo diseñas un sistema de pagos — permisos explícitos, todo auditado, deny por defecto — es porque la disciplina es la misma. Un agente autónomo moviendo información merece el mismo rigor que un endpoint moviendo dinero.
+
+---
+
+## Qué significa para los que construimos software
+
+Es fácil ver los information agents como un feature de consumidor más. Pero el patrón —un loop autónomo que observa, razona y actúa bajo governance— es el mismo que vas a montar la próxima vez que alguien pida "que el sistema me avise cuando pase algo importante".
+
+Las piezas ya están al alcance:
+
+| Capa | Herramienta práctica |
+| --- | --- |
+| Percepción | Un crawler/poller + un modelo de embeddings |
+| Memoria | pgvector, o un vector store dedicado |
+| Razonamiento | Cualquier LLM con RAG |
+| Planning | Tu lógica de threshold (la parte que de verdad importa) |
+| Orquestación | Tu capa de tools + permisos + audit |
+
+El modelo no es el diferenciador — está commoditizado. El diferenciador es el **diseño de sistema** alrededor: cuándo notificar, cómo no repetir, cómo no saturar, cómo auditar, cómo apagar.
+
+No es magia. Es system design. Y como toda herramienta nueva, va a partir a la gente en dos: los que entienden cómo está construida y la doblan a su favor, y los que solo ven la notificación aparecer.
+
+La pregunta no es si vas a construir agentes así. Es si vas a diseñar los guardrails antes de encenderlos.
