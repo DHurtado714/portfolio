@@ -1,4 +1,8 @@
-# Daniel Hurtado
+import { getAllPosts } from "@/lib/content";
+
+export const dynamic = "force-static";
+
+const CURATED = `# Daniel Hurtado
 
 > Software Engineer specializing in Backend, Fintech & ML. Building cross-border payment infrastructure processing $300M+ at Capa.fi. Based in Colombia.
 
@@ -32,4 +36,23 @@ Daniel Hurtado is a Colombian software engineer specializing in backend architec
 - Blog: https://danih.dev/en/blog
 - GitHub: https://github.com/DHurtado714
 - LinkedIn: https://linkedin.com/in/daniel-hurtado
-- Email: danielhurtado714@gmail.com
+- Email: danielhurtado714@gmail.com`;
+
+export function GET() {
+  const posts = getAllPosts("en");
+
+  const postLines = posts
+    .map(
+      (post) =>
+        `- [${post.title}](https://danih.dev/en/blog/${post.slug}) — ${post.description} (${post.date})\n  - Español: https://danih.dev/es/blog/${post.slug}`,
+    )
+    .join("\n");
+
+  const body = `${CURATED}\n\n## Blog Posts\n\n${postLines}\n`;
+
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+    },
+  });
+}

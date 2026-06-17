@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const postEntries = LOCALES.flatMap((locale) =>
     getAllPosts(locale).map((post) => ({
       url: `https://danih.dev/${locale}/blog/${post.slug}`,
-      lastModified: new Date(post.date),
+      lastModified: new Date(post.dateModified ?? post.date),
       changeFrequency: "monthly" as const,
       priority: 0.6,
       alternates: {
