@@ -78,6 +78,7 @@ export const translations = {
       blogDescription:
         "Writing about backend architecture, fintech systems, and lessons learned building software at scale.",
       noPosts: "No posts yet. Stay tuned.",
+      onThisPage: "On this page",
     },
     meta: {
       title: "Daniel — Software Engineer | Backend, Fintech & ML",
@@ -160,6 +161,7 @@ export const translations = {
       blogDescription:
         "Escribiendo sobre arquitectura backend, sistemas fintech y lecciones aprendidas construyendo software a escala.",
       noPosts: "Aún no hay posts. Pronto...",
+      onThisPage: "En esta página",
     },
     meta: {
       title: "Daniel — Ingeniero de Software | Backend, Fintech & ML",
