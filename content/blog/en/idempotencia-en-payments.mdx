@@ -61,8 +61,14 @@ It sounds simple. Getting the implementation right is not.
 
 ## Error #1: SELECT-then-INSERT
 
-The naive implementation is:
+The naive implementation falls into a concurrency trap. The correct one inverts the order. Compare the two:
 
+<Tabs defaultValue="broken">
+  <TabsList>
+    <TabsTrigger value="broken">SELECT-then-INSERT (broken)</TabsTrigger>
+    <TabsTrigger value="correct">INSERT-then-catch (correct)</TabsTrigger>
+  </TabsList>
+  <TabsContent value="broken">
 ```typescript
 // ❌ BROKEN: race condition guaranteed
 const existing = await db.idempotencyKey.findOne({ key, userId });
@@ -71,11 +77,8 @@ if (existing) return existing.response;
 const result = await processTransaction(payload);
 await db.idempotencyKey.insert({ key, userId, response: result });
 ```
-
-This **doesn't work** under concurrency. Two requests arriving at the same time can both pass the `SELECT` (because neither has inserted yet), both execute the transaction, and both try to insert at the end. Result: two real transactions, not one.
-
-The correct way is to invert the order: **try the atomic INSERT first, and catch the UNIQUE constraint violation**.
-
+  </TabsContent>
+  <TabsContent value="correct">
 ```typescript
 // ✅ CORRECT: atomic register, catch on conflict
 try {
@@ -92,8 +95,12 @@ try {
   throw error;
 }
 ```
+  </TabsContent>
+</Tabs>
 
-PostgreSQL guarantees that only one request wins the INSERT. The others receive error 23505 and enter the duplicate handling flow.
+The one on the left **doesn't work** under concurrency. Two requests arriving at the same time can both pass the `SELECT` (because neither has inserted yet), both execute the transaction, and both try to insert at the end. Result: two real transactions, not one.
+
+The one on the right **tries the atomic INSERT first, and catches the UNIQUE constraint violation**. PostgreSQL guarantees that only one request wins the INSERT. The others receive error 23505 and enter the duplicate handling flow.
 
 ---
 
@@ -158,9 +165,9 @@ PROCESSING ──────────> COMPLETED    (handler successful, res
                                    └───> COMPLETED
 ```
 
-**The lock with timeout is critical.** If a request acquires the lock (`status=PROCESSING`) but never completes—the process dies from OOM, the container restarts, whatever—the `locked_at` allows subsequent requests to re-acquire the lock after a timeout (a good default is 30 seconds).
-
-Without this, the system enters permanent deadlock: the key exists in `PROCESSING` forever, and all client retries receive 409 Conflict eternally.
+<Callout type="warning">
+**The lock with timeout is critical.** If a request acquires the lock (`status=PROCESSING`) but never completes—the process dies from OOM, the container restarts, whatever—the `locked_at` allows subsequent requests to re-acquire the lock after a timeout (a good default is 30 seconds). Without this, the system enters permanent deadlock: the key exists in `PROCESSING` forever, and all client retries receive 409 Conflict eternally.
+</Callout>
 
 ---
 
@@ -194,13 +201,17 @@ When a request arrives with `Idempotency-Key`, the correct flow is:
    - Status `PROCESSING` with active lock → return `409 Conflict`
    - Status `PROCESSING` with expired lock or `FAILED` → re-acquire lock atomically and retry
 
+<Callout type="tip">
 Step #5 is where a toy implementation differs from a production one. Most tutorials stop at "if it exists, return the response". Reality has four distinct scenarios, each with its own correct behavior.
+</Callout>
 
 ---
 
 ## Defense in Depth: Why One Layer Isn't Enough
 
 This is what took me the longest to understand at first. Having idempotency keys is the first line, but not the only one.
+
+<Wide>
 
 | Layer | What It Catches | Mechanism |
 |------|-----------|-----------|
@@ -210,6 +221,8 @@ This is what took me the longest to understand at first. Having idempotency keys
 | Status Machine | Replay of completed key | Returns stored response without re-executing |
 | Transaction Dedup Index | Last safety net if everything above fails | UNIQUE on `(user, currencies, amount, time_bucket)` |
 | Entity State Machine | Invalid transitions | Map of valid transitions in the aggregate |
+
+</Wide>
 
 The **dedup index at the transaction table level** is the final safety net:
 
@@ -253,6 +266,8 @@ Some mistakes I saw (or made) that are worth noting:
 
 ## Design Decisions and Why
 
+<Wide>
+
 | Decision | Reason |
 |----------|-------|
 | PostgreSQL over Redis | Source of truth must survive restarts. ACID for financial operations. |
@@ -261,6 +276,8 @@ Some mistakes I saw (or made) that are worth noting:
 | Body hash | Detects key reuse with different parameters. Normalized JSON avoids false mismatches. |
 | Transport layer over domain | Domain shouldn't know idempotency exists. It's separation of concerns. |
 | `(user_id, key)` as UNIQUE | Different users can generate the same UUID by chance. |
+
+</Wide>
 
 ---
 

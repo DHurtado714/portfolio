@@ -61,8 +61,14 @@ Suena simple. La implementación correcta no lo es.
 
 ## El error #1: SELECT-then-INSERT
 
-La implementación naive es:
+La implementación naive cae en una trampa de concurrencia. La forma correcta invierte el orden. Compara las dos:
 
+<Tabs defaultValue="roto">
+  <TabsList>
+    <TabsTrigger value="roto">SELECT-then-INSERT (roto)</TabsTrigger>
+    <TabsTrigger value="correcto">INSERT-then-catch (correcto)</TabsTrigger>
+  </TabsList>
+  <TabsContent value="roto">
 ```typescript
 // ❌ ROTO: race condition garantizada
 const existing = await db.idempotencyKey.findOne({ key, userId });
@@ -71,11 +77,8 @@ if (existing) return existing.response;
 const result = await processTransaction(payload);
 await db.idempotencyKey.insert({ key, userId, response: result });
 ```
-
-Esto **no funciona** bajo concurrencia. Dos requests llegando al mismo tiempo pueden ambos pasar el `SELECT` (porque ninguno ha insertado todavía), ambos ejecutar la transacción, y ambos intentar insertar al final. Resultado: dos transacciones reales, no una.
-
-La forma correcta es invertir el orden: **intentar el INSERT atómico primero, y atrapar la violación de UNIQUE constraint**.
-
+  </TabsContent>
+  <TabsContent value="correcto">
 ```typescript
 // ✅ CORRECTO: atomic register, catch on conflict
 try {
@@ -92,8 +95,12 @@ try {
   throw error;
 }
 ```
+  </TabsContent>
+</Tabs>
 
-PostgreSQL garantiza que solo un request gana el INSERT. Los demás reciben el error 23505 y entran al flujo de manejo de duplicados.
+El de la izquierda **no funciona** bajo concurrencia. Dos requests llegando al mismo tiempo pueden ambos pasar el `SELECT` (porque ninguno ha insertado todavía), ambos ejecutar la transacción, y ambos intentar insertar al final. Resultado: dos transacciones reales, no una.
+
+El de la derecha **intenta el INSERT atómico primero, y atrapa la violación de UNIQUE constraint**. PostgreSQL garantiza que solo un request gana el INSERT. Los demás reciben el error 23505 y entran al flujo de manejo de duplicados.
 
 ---
 
@@ -158,9 +165,9 @@ PROCESSING ──────────> COMPLETED    (handler exitoso, respue
                                    └───> COMPLETED
 ```
 
-**El lock con timeout es crítico.** Si un request adquiere el lock (`status=PROCESSING`) pero nunca completa —el proceso muere por OOM, el container se reinicia, lo que sea— el `locked_at` permite que requests subsecuentes re-adquieran el lock después de un timeout (un buen default es 30 segundos).
-
-Sin esto, el sistema entra en deadlock permanente: la key existe en `PROCESSING` para siempre, y todos los retries del cliente reciben 409 Conflict eternamente.
+<Callout type="warning">
+**El lock con timeout es crítico.** Si un request adquiere el lock (`status=PROCESSING`) pero nunca completa —el proceso muere por OOM, el container se reinicia, lo que sea— el `locked_at` permite que requests subsecuentes re-adquieran el lock después de un timeout (un buen default es 30 segundos). Sin esto, el sistema entra en deadlock permanente: la key existe en `PROCESSING` para siempre, y todos los retries del cliente reciben 409 Conflict eternamente.
+</Callout>
 
 ---
 
@@ -194,13 +201,17 @@ Cuando llega un request con `Idempotency-Key`, el flujo correcto es:
    - Status `PROCESSING` con lock activo → retornar `409 Conflict`
    - Status `PROCESSING` con lock expirado o `FAILED` → re-adquirir lock atómicamente y reintentar
 
+<Callout type="tip">
 El paso #5 es donde se diferencia una implementación de juguete de una de producción. La mayoría de tutoriales se quedan en "si existe, retornar la respuesta". La realidad tiene cuatro escenarios distintos, cada uno con su propio comportamiento correcto.
+</Callout>
 
 ---
 
 ## Defense in depth: por qué una sola capa no basta
 
 Esto es lo que más me costó entender al principio. Tener idempotency keys es la primera línea, pero no la única.
+
+<Wide>
 
 | Capa | Qué atrapa | Mecanismo |
 |------|-----------|-----------|
@@ -210,6 +221,8 @@ Esto es lo que más me costó entender al principio. Tener idempotency keys es l
 | Status Machine | Replay de key completada | Retorna respuesta almacenada sin re-ejecutar |
 | Transaction Dedup Index | Último safety net si todo lo anterior falla | UNIQUE en `(user, currencies, amount, time_bucket)` |
 | Entity State Machine | Transiciones inválidas | Mapa de transiciones válidas en el aggregate |
+
+</Wide>
 
 El **dedup index a nivel de tabla de transactions** es la red de seguridad final:
 
@@ -253,6 +266,8 @@ Algunos errores que vi (o cometí) y que vale la pena marcar:
 
 ## Decisiones de diseño y por qué
 
+<Wide>
+
 | Decisión | Razón |
 |----------|-------|
 | PostgreSQL sobre Redis | Source of truth tiene que sobrevivir restarts. ACID para operaciones financieras. |
@@ -261,6 +276,8 @@ Algunos errores que vi (o cometí) y que vale la pena marcar:
 | Hash del body | Detecta reuso de key con parámetros distintos. JSON normalizado evita falsos mismatches. |
 | Capa de transporte sobre dominio | El dominio no debería saber que existe idempotencia. Es separación de concerns. |
 | `(user_id, key)` como UNIQUE | Diferentes usuarios pueden generar la misma UUID por casualidad. |
+
+</Wide>
 
 ---
 
