@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FullBleed, Wide } from "@/components/blog/full-bleed";
 import { Embed } from "@/components/blog/embed";
 import { MdxImage } from "@/components/blog/mdx-image";
+import { CodeBlock } from "@/components/blog/code-block";
 
 export const mdxComponents: MDXComponents = {
   Callout,
@@ -66,18 +67,20 @@ export const mdxComponents: MDXComponents = {
       {...props}
     />
   ),
-  code: (props) => (
-    <code
-      className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[16px] text-green-light"
-      {...props}
-    />
-  ),
-  pre: (props) => (
-    <pre
-      className="mb-6 overflow-x-auto rounded-xl border border-border-subtle bg-surface p-5 font-mono text-[16px] leading-[1.7]"
-      {...props}
-    />
-  ),
+  code: ({ className, ...props }) => {
+    // Block code (inside <pre>) is tagged with data-language by
+    // rehype-pretty-code — leave it untouched so Shiki spans render cleanly.
+    // Only inline code gets the pill treatment.
+    const isBlock = "data-language" in props;
+    if (isBlock) return <code className={className} {...props} />;
+    return (
+      <code
+        className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[16px] text-green-light"
+        {...props}
+      />
+    );
+  },
+  pre: (props) => <CodeBlock {...props} />,
   hr: () => <hr className="my-10 border-none h-px bg-border-subtle" />,
   img: (props) => <MdxImage src={props.src ?? ""} alt={props.alt ?? ""} />,
   table: (props) => (
