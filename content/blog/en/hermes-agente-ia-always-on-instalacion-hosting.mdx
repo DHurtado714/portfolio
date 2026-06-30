@@ -1,6 +1,6 @@
 ---
-title: "How I set up my own always-on AI agent with Hermes (install and hosting)"
-description: "A practical deep dive into how I installed Hermes, an AI agent with tools, memory and autonomy, and how I got it running 24/7 in the cloud connected to WhatsApp. Real stack, Dockerfile, Railway and the gotchas I hit."
+title: "How to set up your own always-on AI agent with Hermes (install and hosting)"
+description: "A practical guide to installing Hermes —an AI agent with tools, memory and autonomy— and keeping it running 24/7 in the cloud with the official image. What the harness is, which models you can use (free ones included), and how to connect it to WhatsApp or Telegram."
 date: "2026-06-15"
 author: "Daniel"
 tags:
@@ -9,23 +9,22 @@ tags:
     "agents",
     "hermes",
     "self-hosting",
-    "docker",
     "railway",
   ]
 published: true
 ---
 
-# How I set up my own always-on AI agent with Hermes
+# How to set up your own always-on AI agent with Hermes
 
 Most people use AI by opening a chat, asking something, and copying the answer. That's a search engine with better conversation. The real leap happens when the agent has **tools**, **memory**, and runs **on its own**, without you being present.
 
-Hermes is an open-source agent by Nous Research that does exactly that: it runs in your terminal, on messaging platforms, and on your infrastructure, with real access to your system. This post is the playbook of how I installed it and got it running 24/7 in the cloud connected to my WhatsApp — based on my real setup, not the official docs.
+Hermes is an open-source agent by Nous Research that does exactly that: it runs in your terminal, on messaging platforms, and on your own infrastructure, with real access to your system. This guide takes you from zero to an agent running 24/7 in the cloud, connected to your WhatsApp or Telegram, using the official image. You don't need to be a DevOps engineer — if you can hold your own in a terminal, you're set.
 
 <Callout type="info">
-  **TL;DR:** Local install with one command. To make it always-on I host it on Railway with
-  the official Docker image (`nousresearch/hermes-agent`), a persistent volume at `/opt/data`,
-  and a seed-on-boot pattern to carry my state. WhatsApp connects through a bridge that already
-  ships inside the image.
+  **TL;DR:** Install locally with one command to test. To make it always-on you
+  deploy on Railway with the official `nousresearch/hermes-agent` image (no build
+  needed) and a persistent volume at `/opt/data`. WhatsApp and Telegram connect
+  through bridges that already ship inside the image.
 </Callout>
 
 ---
@@ -34,27 +33,26 @@ Hermes is an open-source agent by Nous Research that does exactly that: it runs 
 
 1. [The mental model: harness, not chatbot](#the-mental-model-harness-not-chatbot)
 2. [Local installation](#local-installation)
-3. [Why move it to the cloud](#why-move-it-to-the-cloud)
-4. [What to migrate: state vs install](#what-to-migrate-state-vs-install)
-5. [The Dockerfile and seed-on-boot](#the-dockerfile-and-seed-on-boot)
-6. [Deploying to Railway](#deploying-to-railway)
-7. [Connecting WhatsApp](#connecting-whatsapp)
-8. [Gotchas I hit](#gotchas-i-hit)
-9. [Summary — the minimum viable setup](#summary--the-minimum-viable-setup)
+3. [Which model to use (free ones included)](#which-model-to-use-free-ones-included)
+4. [Why move it to the cloud](#why-move-it-to-the-cloud)
+5. [Deploying to Railway with the official image](#deploying-to-railway-with-the-official-image)
+6. [The volume: where your agent lives](#the-volume-where-your-agent-lives)
+7. [Connecting WhatsApp or Telegram](#connecting-whatsapp-or-telegram)
+8. [Summary — the minimum viable setup](#summary--the-minimum-viable-setup)
 
 ---
 
 ## The mental model: harness, not chatbot
 
-Before installing anything, it's worth understanding what makes Hermes different. The language model is just the engine. What turns it into a useful agent is the **harness** around it:
+Before installing anything, it's worth understanding what makes Hermes different. The language model is just the engine. What turns it into a useful agent is the **harness** around it: the layer that gives it hands, memory, and the ability to act without you.
 
-- **Tools** — terminal, filesystem, web search, browser, code execution. The agent doesn't talk about code: it opens the repo and ships the Pull Request.
-- **Persistent memory** — it remembers who you are, your projects, and decisions across sessions.
-- **Skills** — reusable procedures the agent learns and saves.
-- **Autonomy (cron)** — scheduled tasks that run without you being present.
-- **Multi-platform gateway** — the same agent on WhatsApp, Telegram, Discord, etc.
+- **Tools** — terminal, filesystem, web search, browser, code execution. The agent doesn't *talk* about code: it opens the repo and ships the Pull Request. It doesn't *describe* a file: it reads it, edits it, and saves it.
+- **Persistent memory** — it remembers who you are, your projects, and your decisions across sessions. You don't start from scratch every time.
+- **Skills** — reusable procedures the agent learns once and reapplies: review a PR, publish a post, deploy to production.
+- **Autonomy (cron)** — scheduled tasks that run without you being present: a summary every morning, a price watcher, an email classifier.
+- **Multi-platform gateway** — the same agent, with the same memory, on WhatsApp, Telegram, Discord, or your terminal.
 
-The goal of hosting it in the cloud is simple: make that harness available 24/7, not just when your laptop is open.
+That's what the harness is for: it turns a model that *answers* into a system that *does*. And that's why hosting it in the cloud makes sense — so that system is available 24/7, not just when your laptop is open.
 
 ---
 
@@ -66,185 +64,178 @@ Always start local to test. The install is one command:
 curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 ```
 
-Then you configure the model and API keys with the wizard:
+Then you configure the model and API keys with the interactive wizard:
 
 ```bash
-hermes setup          # interactive wizard (model, terminal, gateway, tools)
-hermes model          # pick model/provider
+hermes setup          # guided wizard: model, terminal, gateway, tools
+hermes model          # pick or change model/provider
 hermes doctor         # check dependencies and config
 ```
-
-Hermes is provider-agnostic — it works with Anthropic, OpenAI, OpenRouter, DeepSeek, local models, and 15+ more. In my case I use Anthropic as the main provider.
 
 For a first interactive test:
 
 ```bash
-hermes                          # interactive chat
-hermes chat -q "summarize this repo in 5 bullets"   # single query
+hermes                                            # interactive chat
+hermes chat -q "summarize this repo in 5 bullets" # single query
 ```
 
-The configuration lives in a few key files:
+The configuration lives in simple files inside `~/.hermes/`:
 
 | File | Contents |
 | --- | --- |
-| `~/.hermes/config.yaml` | Settings: model, toolsets, approvals, compression |
-| `~/.hermes/.env` | Secrets: API keys |
-| `~/.hermes/state.db` | Sessions + memory (SQLite) |
-| `~/.hermes/skills/` | Installed skills |
-| `~/.hermes/auth.json` | OAuth tokens and credential pools |
+| `config.yaml` | Settings: model, toolsets, approvals, compression |
+| `.env` | Secrets: API keys |
+| `state.db` | Sessions + memory (SQLite) |
+| `skills/` | Installed skills |
+| `auth.json` | OAuth tokens and credential pools |
+
+Keep this location in mind: when you move to the cloud, *this* — not the source code — is what persists on the volume.
+
+---
+
+## Which model to use (free ones included)
+
+Hermes is **provider-agnostic**: you pick the engine, and you can change it anytime with `hermes model`. The best part is you're not locked to one — you can stack several into a **pool** and let Hermes rotate between them.
+
+A few options worth knowing for getting started:
+
+- **OpenAI with your ChatGPT plan ($20/mo).** If you already pay for ChatGPT Plus, connect it via the **OpenAI Codex** provider (OAuth login with your account, uses the Codex models). It gives you very generous limits without paying per token separately — one of the most cost-effective paths for a personal agent.
+- **NVIDIA — free models.** NVIDIA's **Nemotron** models are available via [build.nvidia.com](https://build.nvidia.com) with a free `NVIDIA_API_KEY`. Open frontier models, no cost, ideal for not burning budget on background tasks.
+- **OpenRouter.** A single API key that routes to hundreds of models (Claude, Gemini, DeepSeek, Qwen…). Perfect when you want to try several without opening an account with each provider. It's Hermes' default.
+- **Kimi / Moonshot.** Very capable chat and coding models, with a `KIMI_API_KEY`.
+- **Ollama.** If you want to run **local** models on your own machine (full privacy, zero API cost), Hermes connects to Ollama like any other provider. Just give it at least 64K of context (`-c 65536`).
+
+<Callout type="tip">
+  **All of these can be used as a pool.** Hermes supports a *fallback* chain: you
+  define a primary model and a list of backups, and when one runs out of quota or
+  fails, the agent switches to the next **mid-session**, without losing the
+  conversation. So you can combine, for example, a free Nemotron as primary, your
+  ChatGPT plan as backup, and OpenRouter as the final safety net.
+</Callout>
+
+```yaml
+# ~/.hermes/config.yaml — a model pool with backups
+fallback_providers:
+  - provider: nvidia
+    model: nvidia/nemotron-3-ultra
+  - provider: openai-codex
+    model: gpt-5-codex
+  - provider: openrouter
+    model: anthropic/claude-sonnet-4
+```
+
+The only requirement: the model needs at least **64,000 tokens of context**. Almost all hosted ones (Claude, GPT, Gemini, Qwen, DeepSeek) clear that easily.
 
 ---
 
 ## Why move it to the cloud
 
-Local works, but it has one problem: the agent only exists while your machine is on. If you want scheduled tasks to run overnight, the WhatsApp bot to always answer, and the agent to survive reboots and laptop lids closing, you need an always-on host.
+Local works, but it has one limit: the agent only exists while your machine is on. If you want scheduled tasks to run overnight, the bot to always answer, and the agent to survive reboots and laptop lids closing, you need an always-on host.
 
 <Callout type="warning">
-  Always-on hosting costs money. There's no permanent free tier: on Railway you need the Hobby
-  plan (~$5/mo + usage) for a persistent service with a volume. Better to know upfront.
+  Always-on hosting costs money. There's no permanent free tier: on Railway you
+  need the Hobby plan (~$5/mo + usage) for a persistent service with a volume.
+  Better to know upfront.
 </Callout>
 
-I chose Railway for simplicity: it deploys a custom Docker image with a persistent volume, without having to administer a VPS by hand.
+I chose Railway because it's about as simple as it gets: it deploys a Docker image with a persistent volume, no VPS to administer by hand. And since Hermes already publishes an official image, **you don't have to build anything**.
 
 ---
 
-## What to migrate: state vs install
+## Deploying to Railway with the official image
 
-The most common mistake when migrating is trying to move the whole installation. Don't. "Migrating Hermes" is moving the **state**, not the install. The state is small (tens of MB); the install is large and the Docker image already ships it.
+The key to this setup: the official `nousresearch/hermes-agent` image **already ships everything** — Hermes, the WhatsApp and Telegram bridges, and s6-overlay supervision (auto-restart if something crashes). You don't write a Dockerfile; you deploy the image as-is.
 
-| Migrate (state, portable) | Do NOT migrate |
-| --- | --- |
-| `config.yaml`, `.env` | `hermes-agent/` (source + venv, 2+ GB — already in the image) |
-| `state.db` (sessions + memory) | `logs/`, `cache/`, `audio_cache/` |
-| `auth.json`, `skills/`, `memories/`, `cron/` | host-specific `.env` lines (local paths) |
-| platform session (e.g. `whatsapp/`) | |
+The simplest path is through the Railway dashboard:
 
-To inventory what weighs what before packing:
+1. **New Project → Deploy from Docker Image.**
+2. Image: `nousresearch/hermes-agent:latest`.
+3. **Add Volume**, mount path: `/opt/data` (this is where the agent's state lives).
+4. Under **Variables**, add your provider API key and whichever channels you want, for example:
+   - `ANTHROPIC_API_KEY=*** (or `OPENROUTER_API_KEY`, `NVIDIA_API_KEY`, etc.)
+   - `TELEGRAM_BOT_TOKEN=*** to connect Telegram
+5. **Deploy** and open the logs.
+
+If you prefer the terminal, the Railway CLI does the same:
 
 ```bash
-du -sh ~/.hermes/*/ | sort -rh
+railway init                                  # name, e.g. hermes-gateway
+railway add --service hermes \
+  --image nousresearch/hermes-agent:latest    # ← official image, no build
+railway volume add --mount-path /opt/data     # persistent volume
+railway variables --set "ANTHROPIC_API_KEY=*** \
+                  --set "TELEGRAM_BOT_TOKEN=*** up
+railway logs                                  # wait for "connected"
 ```
 
-If `hermes-agent/` dominates the total, that confirms those 2 GB are source/venv you do NOT migrate.
+Once it's up, configure the model by SSH-ing into the container and running the wizard once (it's saved to the volume):
+
+```bash
+railway ssh
+hermes setup     # pick provider/model; it's written to /opt/data
+```
+
+From there, s6-overlay keeps the process alive: if the gateway crashes, it restarts on its own.
 
 ---
 
-## The Dockerfile and seed-on-boot
+## The volume: where your agent lives
 
-The official `nousresearch/hermes-agent` image already ships Hermes + the WhatsApp bridge, supervised by **s6-overlay** (auto-restart on crash). If your local setup uses extra tools like the GitHub CLI, you add them in your own layer:
+The volume mounted at `/opt/data` is the container's `~/.hermes`: that's where your `config.yaml`, your `state.db` (memory + sessions), your skills, and the messaging session live. It survives redeploys and restarts, so your agent **doesn't lose its memory** every time you update.
 
-```dockerfile
-FROM nousresearch/hermes-agent:latest
-USER root
-RUN apt-get update \
- && apt-get install -y --no-install-recommends curl ca-certificates gnupg git \
- && mkdir -p -m 755 /etc/apt/keyrings \
- && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-      | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
- && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-      > /etc/apt/sources.list.d/github-cli.list \
- && apt-get update && apt-get install -y --no-install-recommends gh \
- && rm -rf /var/lib/apt/lists/*
-COPY seed /seed
-COPY entrypoint-seed.sh /usr/local/bin/entrypoint-seed.sh
-RUN chmod +x /usr/local/bin/entrypoint-seed.sh
-VOLUME ["/opt/data"]
-ENTRYPOINT ["/usr/local/bin/entrypoint-seed.sh"]
-CMD ["gateway", "run"]
-```
-
-To get my config/memory/skills onto the fresh volume without copying over SSH by hand, I use the **seed-on-first-boot** pattern: pack my state into a tarball inside the image and extract it on first boot behind a marker file.
-
-```bash
-#!/bin/bash
-# entrypoint-seed.sh — extract the seed into the volume once, then start hermes
-DATA_DIR="${HERMES_HOME:-/opt/data}"
-[ -f "$DATA_DIR/.seeded" ] || {
-  tar -xzf /seed/hermes-state.tgz -C "$DATA_DIR"
-  touch "$DATA_DIR/.seeded"
-}
-exec hermes "$@"   # CMD is ["gateway","run"]
-```
-
-The persistent volume mounts at `/opt/data`, which is the container's `~/.hermes`. The `.seeded` marker prevents re-seeding (and clobbering live state) on every restart.
-
-To pack the seed on the source machine:
-
-```bash
-mkdir -p ~/hermes-railway/seed
-cd ~/.hermes
-tar -czf ~/hermes-railway/seed/hermes-state.tgz \
-  --exclude='./logs' --exclude='./cache' --exclude='./audio_cache' \
-  config.yaml .env state.db auth.json skills memories cron
-# WhatsApp session separately:
-tar -czf ~/hermes-railway/seed/whatsapp-session.tgz -C ~/.hermes whatsapp
-```
+If you're starting from scratch, you don't have to migrate anything: configure directly in the container and you're done.
 
 <Callout type="info">
-  Secrets trade-off: baking `.env`/`auth.json` into the image is simplest but puts your API
-  keys in the (private) registry. The safer alternative is seeding via `railway ssh` after
-  first boot, or injecting keys as platform variables.
+  Already had a local Hermes with memory and skills you want to keep? Pack only
+  the **state** (not the source) and copy it into the volume after first boot:
+
+  ```bash
+  # on your local machine
+  cd ~/.hermes
+  tar -czf /tmp/hermes-state.tgz \
+    --exclude='./logs' --exclude='./cache' \
+    config.yaml .env state.db auth.json skills memories cron
+  # upload and extract it into the volume via: railway ssh
+  ```
+
+  Hermes' source code (2+ GB) is already in the image — that never gets migrated.
 </Callout>
 
 ---
 
-## Deploying to Railway
+## Connecting WhatsApp or Telegram
 
-With the `railway` CLI authenticated (`railway whoami`):
+This is where the agent gets into your pocket. Both bridges already live inside the official image, so you don't install anything extra — you just enable the channel.
+
+**Telegram** is the lowest-friction path: create a bot with [@BotFather](https://t.me/BotFather), copy the token, and set it as a variable. No QR, no re-pairing — the token *is* the whole authentication.
 
 ```bash
-cd ~/hermes-railway
-railway init                              # name, e.g. hermes-gateway
-railway add --service hermes              # create service
-railway volume add --mount-path /opt/data # persistent volume = container's ~/.hermes
-railway variables --set "ANTHROPIC_API_KEY=*** \
-                  --set "WHATSAPP_ENABLED=true" --set "WHATSAPP_MODE=self-chat"
-railway up                                # build + deploy the custom image
-railway logs                              # wait for the seed + "connected"
+railway variables --set "TELEGRAM_BOT_TOKEN=123456:ABC..."
 ```
 
-In the logs you'll see the seed extracted the first time and each adapter connecting. From there, s6-overlay keeps the process alive: if the gateway crashes, it restarts on its own.
-
----
-
-## Connecting WhatsApp
-
-This is the part that makes the agent live in your pocket. The WhatsApp bridge already ships inside the official image (a Node bridge the container starts on its own), so you don't install anything extra — you just need to link the session.
+**WhatsApp** lives closer to your day-to-day, but takes one extra step. You enable it with two variables:
 
 ```bash
 railway variables --set "WHATSAPP_ENABLED=true" --set "WHATSAPP_MODE=self-chat"
 ```
 
-The `self-chat` mode lets you talk to the agent from your own chat. The first time, WhatsApp Web may ask to link a new device: the QR shows up in `railway logs`, you scan it with your phone (Linked devices), and it's connected.
+The `self-chat` mode lets you talk to the agent from your own chat. The first time, WhatsApp Web may ask to link a device: the QR shows up in `railway logs`, you scan it with your phone (Linked devices), and it's connected.
 
 <Callout type="tip">
-  Telegram is simpler than WhatsApp for this: the bot token is the whole authentication, no QR
-  or re-pairing. If you want the lowest-friction path to start, Telegram is a good first channel
-  and you add WhatsApp later.
+  If you want to start with the minimum, begin with Telegram (token and done) and
+  add WhatsApp later. The agent is the same on both — they share memory.
 </Callout>
-
----
-
-## Gotchas I hit
-
-- **The `gh` token doesn't travel in any tarball.** On many systems it lives in the OS keychain, not a file. You have to `gh auth login` inside the container after deploy (`railway ssh`).
-- **WhatsApp may ask to re-link.** The session sometimes survives the host change and sometimes triggers WhatsApp Web's "new device" flow. If it does, the QR shows up in the logs.
-- **Two gateways = duplicate replies.** Once you confirm the cloud gateway answers correctly, stop the local one (`hermes gateway stop`) or both bots reply to the same chat. Do this as the final step, never before verifying.
-- **Don't migrate the source directory.** `hermes-agent/` (2+ GB) is Hermes itself; the image already has it. Exclude it from the seed along with `logs/cache/audio_cache`.
-- **Host-specific variables.** `.env` lines pointing at local paths (browser executables, sandbox images) need to be dropped or edited — they point at your old machine.
 
 ---
 
 ## Summary — the minimum viable setup
 
-If you're starting from scratch, this is the priority order:
+If you're starting from scratch, this is the order:
 
-1. **Local install** — `curl … | bash`, `hermes setup`, test interactively.
-2. **Define your harness** — enable the toolsets you'll use, set up memory and a skill or two.
-3. **Pack the state** — tarball with `config.yaml`, `.env`, `state.db`, `auth.json`, `skills`, `memories`, `cron` (exclude source, logs, cache).
-4. **Image + seed-on-boot** — `FROM nousresearch/hermes-agent` + entrypoint that extracts the seed once.
-5. **Railway** — service + volume at `/opt/data` + variables, `railway up`.
-6. **WhatsApp** — `WHATSAPP_ENABLED=true`, scan the QR from the logs.
-7. **Cut over the local one** — only after verifying the cloud one.
+1. **Install locally** — `curl … | bash`, `hermes setup`, test interactively.
+2. **Pick your model** — a plan you already pay for (ChatGPT $20), a free one (NVIDIA's Nemotron), or a pool with fallback across several.
+3. **Deploy on Railway** — official `nousresearch/hermes-agent` image, volume at `/opt/data`, variables with your API key.
+4. **Configure in the container** — `railway ssh` → `hermes setup`, once.
+5. **Connect a channel** — Telegram (token) or WhatsApp (QR from the logs).
 
-The result: an agent with tools, memory, and autonomy, running 24/7, that I talk to over WhatsApp like it's another person. It's not a chatbot. It's a harness with hands, and it lives in the cloud.
+The result: an agent with tools, memory, and autonomy, running 24/7, that you talk to over WhatsApp or Telegram like it's another person. It's not a chatbot. It's a harness with hands, and it lives in the cloud.
