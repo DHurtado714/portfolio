@@ -113,7 +113,7 @@ export function TableOfContents({
       {items.length > 0 && (
         <nav
           aria-label={label}
-          className="fixed right-8 top-32 hidden w-56 xl:block"
+          className="fixed left-[calc(50%+384px)] top-32 hidden w-56 xl:block"
         >
           <p className="mb-4 font-mono text-[11px] uppercase tracking-[2px] text-text-muted">
             {label}
