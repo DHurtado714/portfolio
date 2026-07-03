@@ -1,0 +1,213 @@
+---
+title: "Context Engineering para agentes de pagos: la habilidad que reemplazó al prompt perfecto"
+description: "Por qué la habilidad de 2026 no es el prompt sino el context engineering: curar los tokens exactos que ve un agente. Una guía práctica sobre un agente real de conciliación de pagos."
+date: "2026-07-03"
+author: "Daniel"
+tags:
+  [
+    "ai-agents",
+    "context-engineering",
+    "llm",
+    "payments",
+    "fintech",
+    "backend",
+  ]
+published: true
+---
+
+> Por qué la habilidad de 2026 no es la redacción del prompt sino el context engineering: curar el conjunto exacto de tokens que ve un agente en cada paso. Una guía práctica sobre un agente real de conciliación de pagos.
+
+---
+
+Esta guía es un playbook práctico basado en uso real, no documentación oficial. Todo lo que está aquí viene de construir agentes de IA sobre un stack de NestJS + AWS + TypeScript + PostgreSQL que mueve plata en LATAM. Si suena opinionado, es porque la producción lo volvió así.
+
+<Callout type="info">
+  **TL;DR** — El cuello de botella de un agente confiable no es el modelo ni la
+  redacción de tu prompt. Es el contexto: los tokens exactos que el modelo ve en
+  cada paso de inferencia. Cura ese contexto con intención (recupera los datos
+  correctos, comprime el historial, acota las herramientas, valida las entradas)
+  y un prompt sencillo funciona. Métele todo y reza, y hasta un prompt brillante
+  concilia el ledger equivocado con total confianza.
+</Callout>
+
+## Tabla de contenidos
+
+1. La era del prompt se está cerrando
+2. Qué es realmente el context engineering
+3. Un problema real: el agente de conciliación
+4. Error #1: volcar el mundo entero al prompt
+5. Error #2: historial crudo en vez de memoria curada
+6. Acotar las herramientas también es contexto
+7. El pipeline de contexto mínimo viable
+8. Cómo sabes que funciona
+
+---
+
+## 1. La era del prompt se está cerrando
+
+Durante dos años el oficio fue el "prompt engineering": palabras mágicas, frases ingeniosas, system prompts de 400 líneas fotografiados como trofeos.
+
+Esa era se está cerrando. No porque los prompts dejaran de importar, sino porque dejaron de ser la parte difícil.
+
+El modelo que tienes enfrente ya es excelente. Lo que decide si tu agente es confiable o un pasivo es **qué le das de comer** en cada paso: los documentos, las definiciones de herramientas, el historial y los datos recuperados que arman la ventana de contexto.
+
+Esa disciplina tiene nombre en 2026: **context engineering**.
+
+El prompt engineering era escribir. El context engineering es arquitectura.
+
+---
+
+## 2. Qué es realmente el context engineering
+
+El context engineering es la construcción deliberada del conjunto de tokens que el modelo consume en cada llamada de inferencia. En concreto, siempre estás decidiendo:
+
+- **Qué conocimiento** recuperar (y cuál dejar afuera).
+- **Cuánto historial** conservar, y en qué forma comprimida.
+- **Qué herramientas** puede ver y llamar el modelo en este paso.
+- **Qué preprocesar** antes de que los tokens lleguen al modelo.
+
+El modelo mental ingenuo es "pongo todo lo relevante en el prompt para que el modelo tenga información completa". En la práctica, así es exactamente como fallan los agentes: más tokens no es más señal. Es más ruido, más costo y más espacio para que el modelo se aferre al dato equivocado.
+
+| | Prompt engineering | Context engineering |
+|---|---|---|
+| Unidad de trabajo | Redacción de un prompt | Todo el pipeline de tokens |
+| Pregunta | "¿Qué digo?" | "¿Qué ve el modelo?" |
+| Modo de falla | Salida torpe | Salida segura y equivocada |
+| Escala con | Ingenio | Diseño de sistema |
+
+---
+
+## 3. Un problema real: el agente de conciliación
+
+Tomemos un caso concreto de pagos. Quiero un agente que, dado un reporte de settlement de un proveedor de pagos, lo concilie contra nuestro ledger interno y marque las discrepancias.
+
+El dominio tiene miles de transacciones, decenas de formatos de proveedor y reglas de compliance que cambian por país (SPEI en México, PIX en Brasil). La tentación es obvia: darle todo al modelo y dejarlo razonar.
+
+Ese es el camino ingenuo. Veámoslo romperse.
+
+---
+
+## 4. Error #1: volcar el mundo entero al prompt
+
+<Tabs defaultValue="broken">
+  <TabsList>
+    <TabsTrigger value="broken">Todo en el contexto (roto)</TabsTrigger>
+    <TabsTrigger value="correct">Recuperar lo relevante (correcto)</TabsTrigger>
+  </TabsList>
+  <TabsContent value="broken">
+
+```typescript
+// ❌ ROTO: meter el ledger entero + todas las reglas al prompt
+async function reconcile(report: SettlementReport) {
+  const allTransactions = await ledger.findAll(); // 40.000 filas
+  const allRules = await rules.findAll();          // todos los países
+
+  const prompt = `
+    Este es nuestro ledger completo: ${JSON.stringify(allTransactions)}
+    Estas son todas las reglas de compliance: ${JSON.stringify(allRules)}
+    Concilia este reporte: ${JSON.stringify(report)}
+  `;
+
+  return llm.complete(prompt); // revienta la ventana, cuesta una fortuna
+                               // y mete reglas de MX en un reporte de BR
+}
+```
+
+  </TabsContent>
+  <TabsContent value="correct">
+
+```typescript
+// ✅ CORRECTO: recuperar solo la porción que este reporte necesita
+async function reconcile(report: SettlementReport) {
+  // Acotar por las llaves que el reporte realmente referencia
+  const ids = report.entries.map((e) => e.transactionId);
+  const transactions = await ledger.findByIds(ids); // solo lo relevante
+
+  // Acotar las reglas al país del reporte, no al rulebook completo
+  const rules = await ruleService.forCountry(report.country);
+
+  const context = buildContext({ transactions, rules, report });
+  return llm.complete(context); // pequeño, preciso, barato, correcto
+}
+```
+
+  </TabsContent>
+</Tabs>
+
+La versión rota no solo cuesta más. Es *menos precisa*. Cargar reglas de compliance mexicanas en un reporte brasileño le da al modelo una razón con pinta creíble para marcar una transacción válida. El arreglo no es un mejor prompt: es recuperar el subconjunto correcto.
+
+---
+
+## 5. Error #2: historial crudo en vez de memoria curada
+
+Los agentes de varios pasos acumulan historial. El enfoque ingenuo anexa cada paso literal. Veinte tool calls después, la ventana está llena de salidas viejas y el modelo razona sobre ruido.
+
+```typescript
+// ❌ ROTO: anexar cada paso crudo para siempre
+context.messages.push({ role: "tool", content: rawToolOutput });
+
+// ✅ CORRECTO: comprimir cada paso en un hecho durable
+const fact = summarizeToolResult(rawToolOutput);
+// ej: "Revisadas 320 entradas; 3 discrepancias en transactionIds [a, b, c]"
+memory.remember(fact);
+context.messages = memory.relevantTo(currentStep);
+```
+
+Memoria no es "guardar todo". Es guardar los hechos *correctos* en una forma que el modelo pueda usar, y descartar el resto. Un knowledge-graph o un simple store por llave sirven — lo que importa es que cures, no que acumules.
+
+---
+
+## 6. Acotar las herramientas también es contexto
+
+Las definiciones de herramientas también viven en la ventana de contexto. Cada herramienta que expones es tokens que el modelo lee *y* una puerta que puede abrir.
+
+Para un paso de conciliación, el agente necesita `findByIds`, `forCountry` y `flagMismatch`. **No** necesita `refundTransaction` ni `updateLedger`. Exponerlas es contexto desperdiciado y un riesgo real.
+
+```typescript
+// ✅ CORRECTO: toolset acotado por paso
+const tools = [findByIds, forCountry, flagMismatch]; // leer + marcar
+// refundTransaction / updateLedger NO están en scope aquí
+```
+
+La autonomía acotada es context engineering. El modelo no puede abusar de una herramienta que nunca recibió.
+
+---
+
+## 7. El pipeline de contexto mínimo viable
+
+Reducido a lo esencial, cada agente confiable que he construido tiene las mismas cuatro etapas entre la petición y el modelo:
+
+1. **Recuperar** — trae solo el conocimiento que este paso referencia (por ID, por país, por rango de fechas). Nunca "find all".
+2. **Comprimir** — convierte salidas crudas e historial en hechos durables y mínimos antes de que vuelvan a la ventana.
+3. **Acotar** — expón solo las herramientas que este paso legítimamente necesita.
+4. **Validar** — normaliza las entradas antes de que se vuelvan tokens; un campo malformado se vuelve una conclusión alucinada.
+
+El prompt va encima de ese pipeline. Es el último 5% del trabajo, no el primero.
+
+---
+
+## 8. Cómo sabes que funciona
+
+Lo mides. En 2026 la pregunta de confiabilidad se responde con evaluaciones, no con intuición:
+
+- **Success rate** sobre un set fijo de casos de conciliación con respuesta conocida.
+- **Relevancia del contexto** — ¿los tokens que le diste al modelo realmente contenían los hechos necesarios?
+- **Propagación de error** — cuando el paso 3 está mal, ¿el paso 8 colapsa o se recupera?
+
+Si la precisión cae, el primer sospechoso casi nunca es el prompt. Es el contexto: se coló algo irrelevante, o se quedó afuera algo necesario.
+
+---
+
+## Resumen — el orden de prioridad
+
+Si estás construyendo un agente que toca algo real, arma el contexto en este orden:
+
+1. **Recupera con precisión.** La mayor ganancia de exactitud es no cargar lo que no necesitas.
+2. **Comprime la memoria.** Cura hechos; nunca anexes historial crudo para siempre.
+3. **Acota las herramientas por paso.** Menos puertas, menos desastres, contexto más limpio.
+4. **Valida las entradas.** Tokens basura entran, basura con confianza sale.
+5. **Después** escribe el prompt.
+
+Las palabras se volvieron fáciles. El diseño del sistema alrededor del modelo nunca lo fue.
+
+Y sigo aprendiendo.
