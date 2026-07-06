@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, JetBrains_Mono, DM_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 import PostHogProvider from "@/components/posthog-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { LOCALES, DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
 import "./globals.css";
 
@@ -63,6 +64,7 @@ export default async function RootLayout({
         className={`${syne.variable} ${jetbrainsMono.variable} ${dmSans.variable} antialiased`}
       >
         <PostHogProvider>{children}</PostHogProvider>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

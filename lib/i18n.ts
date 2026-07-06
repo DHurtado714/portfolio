@@ -66,7 +66,38 @@ export const translations = {
       headline2: "something",
       headline3: "together.",
       description:
-        "Open to fintech opportunities, interesting backend challenges, and conversations about systems that matter.",
+        "Got a product to build, an idea worth prototyping, or a system that needs untangling? I take on select freelance projects and collaborations on the side — let's make it real.",
+      form: {
+        orReachMe: "Or reach me directly",
+        intentQuestion: "What brings you here?",
+        intents: {
+          freelance: "Freelance",
+          idea: "Crazy idea",
+          hi: "Just say hi",
+        },
+        nameLabel: "Name",
+        namePlaceholder: "Your name",
+        emailLabel: "Email",
+        emailPlaceholder: "you@company.com",
+        messageLabel: "Message",
+        placeholders: {
+          freelance: "Tell me about the project, timeline, and budget…",
+          idea: "Pitch me the crazy idea — I'm listening…",
+          hi: "Say hi, ask anything, or just wave 👋",
+        },
+        submit: "Send message",
+        sending: "Sending…",
+        errors: {
+          name: "Please enter your name",
+          email: "Enter a valid email",
+          message: "Message must be at least 10 characters",
+        },
+        toast: {
+          success: "Thanks — your message is on its way. I'll reply soon.",
+          error: "Something went wrong. Try again or email me directly.",
+          rateLimited: "Slow down a moment — too many messages just now.",
+        },
+      },
     },
     footer: {
       tagline: "Built with intention. Deployed with care.",
@@ -149,7 +180,38 @@ export const translations = {
       headline2: "algo",
       headline3: "juntos.",
       description:
-        "Abierto a oportunidades en fintech, retos de backend interesantes y conversaciones sobre sistemas que importan.",
+        "¿Tienes un producto que construir, una idea que vale la pena prototipar o un sistema que hay que desenredar? Tomo proyectos freelance y colaboraciones seleccionadas — hagámoslo realidad.",
+      form: {
+        orReachMe: "O escríbeme directamente",
+        intentQuestion: "¿Qué te trae por aquí?",
+        intents: {
+          freelance: "Freelance",
+          idea: "Idea loca",
+          hi: "Solo saludar",
+        },
+        nameLabel: "Nombre",
+        namePlaceholder: "Tu nombre",
+        emailLabel: "Correo",
+        emailPlaceholder: "tu@empresa.com",
+        messageLabel: "Mensaje",
+        placeholders: {
+          freelance: "Cuéntame del proyecto, tiempos y presupuesto…",
+          idea: "Lánzame la idea loca — te escucho…",
+          hi: "Salúdame, pregunta lo que sea, o solo di hola 👋",
+        },
+        submit: "Enviar mensaje",
+        sending: "Enviando…",
+        errors: {
+          name: "Escribe tu nombre",
+          email: "Ingresa un correo válido",
+          message: "El mensaje debe tener al menos 10 caracteres",
+        },
+        toast: {
+          success: "¡Gracias! Tu mensaje va en camino. Respondo pronto.",
+          error: "Algo salió mal. Intenta de nuevo o escríbeme directo.",
+          rateLimited: "Espera un momento — demasiados mensajes seguidos.",
+        },
+      },
     },
     footer: {
       tagline: "Construido con intención. Desplegado con cuidado.",
