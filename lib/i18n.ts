@@ -120,6 +120,22 @@ export const translations = {
       twitterDescription:
         "Backend, Fintech & ML. Cross-border payments across 15+ countries. AWS certified.",
     },
+    errors: {
+      notFound: {
+        eyebrow: "ERROR 404 · ROUTE NOT FOUND",
+        code: "404",
+        title: "This route never got deployed.",
+        primaryCta: "Back to home",
+        secondaryCta: "Read the blog",
+      },
+      serverError: {
+        eyebrow: "ERROR 500 · INTERNAL SERVER ERROR",
+        code: "500",
+        title: "The server threw an exception.",
+        primaryCta: "Try again",
+        secondaryCta: "Back to home",
+      },
+    },
   },
   es: {
     nav: {
@@ -233,6 +249,22 @@ export const translations = {
         "Construyendo infraestructura de pagos transfronterizos en 15+ países. Arquitectura backend, sistemas fintech y ML.",
       twitterDescription:
         "Backend, Fintech & ML. Pagos transfronterizos en 15+ países. Certificado en AWS.",
+    },
+    errors: {
+      notFound: {
+        eyebrow: "ERROR 404 · RUTA NO ENCONTRADA",
+        code: "404",
+        title: "Esta ruta nunca se desplegó.",
+        primaryCta: "Volver al inicio",
+        secondaryCta: "Leer el blog",
+      },
+      serverError: {
+        eyebrow: "ERROR 500 · ERROR INTERNO DEL SERVIDOR",
+        code: "500",
+        title: "El servidor lanzó una excepción.",
+        primaryCta: "Reintentar",
+        secondaryCta: "Volver al inicio",
+      },
     },
   },
 } as const;

@@ -37,6 +37,22 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(target, request.url));
   }
 
+  // Anything left is a top-level path whose first segment isn't a valid locale
+  // (e.g. /some-typo). Let real assets and metadata routes through, but funnel
+  // page-like paths under a locale prefix so they resolve to the localized 404
+  // boundary — a layout's notFound() can't render its own boundary.
+  const firstSegment = pathname.split("/")[1] ?? "";
+  const isAssetOrMetadataRoute =
+    firstSegment.includes(".") ||
+    ["opengraph-image", "twitter-image", "icon", "apple-icon", "manifest"].includes(
+      firstSegment
+    );
+
+  if (!isAssetOrMetadataRoute) {
+    const locale = detectLocale(request);
+    return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+  }
+
   return NextResponse.next();
 }
 

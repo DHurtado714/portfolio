@@ -142,3 +142,82 @@ html {
     background-image: linear-gradient(to bottom right, #00C878, #00E88F, #00FFB2);
   }
 }
+
+/* ── Error pages (404 / 500) ───────────────────────────── */
+
+/* Glitch: two clipped color-shifted copies jitter over the base digits */
+@keyframes glitch-shift-a {
+  0%, 92%, 100% { transform: translate(0); opacity: 0; }
+  93% { transform: translate(-3px, 1px); opacity: 0.8; }
+  95% { transform: translate(3px, -2px); opacity: 0.7; }
+  97% { transform: translate(-2px, -1px); opacity: 0.8; }
+}
+
+@keyframes glitch-shift-b {
+  0%, 90%, 100% { transform: translate(0); opacity: 0; }
+  91% { transform: translate(3px, -1px); opacity: 0.6; }
+  94% { transform: translate(-4px, 2px); opacity: 0.7; }
+  98% { transform: translate(2px, 1px); opacity: 0.6; }
+}
+
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.glitch::before {
+  color: #00E88F;
+  animation: glitch-shift-a 3.5s steps(1) infinite;
+  clip-path: inset(0 0 55% 0);
+}
+
+.glitch::after {
+  color: #ff4466;
+  animation: glitch-shift-b 3.5s steps(1) infinite;
+  animation-delay: 0.1s;
+  clip-path: inset(60% 0 0 0);
+}
+
+/* Soft float used for the drifting circuit nodes */
+@keyframes node-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-node-drift {
+  animation: node-drift 4s ease-in-out infinite;
+}
+
+/* A single scanline sweeping down the terminal window */
+@keyframes scanline {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(2000%); opacity: 0; }
+}
+
+.animate-scanline {
+  animation: scanline 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch::before,
+  .glitch::after,
+  .animate-node-drift,
+  .animate-scanline {
+    animation: none;
+  }
+  .glitch::before,
+  .glitch::after {
+    opacity: 0;
+  }
+}
