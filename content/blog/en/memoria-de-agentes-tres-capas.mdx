@@ -1,0 +1,250 @@
+---
+title: "Agent memory: the three tiers between a demo and an agent that learns"
+description: "Context engineering solves a single turn; memory solves continuity. A practical guide to the three-tier model (core, recall, archival) built on a real payment reconciliation agent in LATAM."
+date: "2026-07-09"
+author: "Daniel"
+tags:
+  [
+    "ai-agents",
+    "agent-memory",
+    "context-engineering",
+    "llm",
+    "payments",
+    "backend",
+  ]
+published: true
+---
+
+> Why the 2026 problem is no longer the prompt or the single-turn context, but the memory that persists across runs. The three-tier model (core, recall, archival) explained on a real payment reconciliation agent.
+
+---
+
+This is a practical playbook based on real use, not official documentation. Everything here comes from building agents on a NestJS + AWS + TypeScript + PostgreSQL stack that moves money in LATAM. If it sounds opinionated, production made it that way.
+
+<Callout type="info">
+  **TL;DR** — Context engineering curates the tokens of **one** inference step.
+  Memory decides what survives **between** steps, runs and sessions. An agent
+  without memory repeats work, repeats questions and repeats mistakes. The pattern
+  that holds up in production is a three-tier hierarchy: **core** (what it must
+  always know), **recall** (what it fetches on demand) and **archival** (everything
+  else, stored and searchable but not loaded). It's not a bigger model. It's state
+  architecture.
+</Callout>
+
+## Table of contents
+
+1. The brilliant agent with amnesia
+2. Context and memory are not the same
+3. The three tiers: core, recall, archival
+4. Mistake #1: stuffing all of memory into the prompt
+5. Mistake #2: treating the raw log as memory
+6. Writing to memory is a design decision too
+7. The minimum viable pipeline
+8. How you know it works
+
+---
+
+## 1. The brilliant agent with amnesia
+
+My payment reconciliation agent was good. It matched ledger movements against bank and processor settlements, flagged discrepancies, proposed adjustments.
+
+And every run started from zero.
+
+It kept "discovering" that a certain merchant in Mexico settles with a two-day lag over SPEI. It kept asking about rules I had explained the day before. It kept making the same matching mistake on the same weird PIX edge case in Brazil.
+
+My context engineering was tuned: good retrieval, compressed history, scoped tools. But that solves **one** turn.
+
+The problem wasn't the context of a single inference. It was that nothing survived to the next one.
+
+It was a memory problem.
+
+---
+
+## 2. Context and memory are not the same
+
+It's the most expensive confusion of 2026, so it's worth separating them precisely.
+
+| | Context | Memory |
+|---|---|---|
+| Scope | A single inference | Across sessions and runs |
+| Lifetime | Ephemeral (built and discarded) | Persistent |
+| Question it answers | What does the model see **now**? | What must it remember **tomorrow**? |
+| Typical failure | Noise, irrelevant tokens | Amnesia, repeated work |
+| Tooling | Retrieval, compression, tool-scoping | Store + read/write policy |
+
+Context engineering gives you the perfect step. Memory gives you continuity. You need both, but they are distinct layers and you design them differently.
+
+An agent with pristine context and no memory is a genius with amnesia: it solves each isolated case brilliantly and never composes on yesterday.
+
+---
+
+## 3. The three tiers: core, recall, archival
+
+The pattern that stabilized in production agents is a three-level hierarchy. The idea: not everything the agent "knows" belongs in the context, and not everything it stores deserves the same treatment.
+
+- **Core** — what the agent must **always** know. Fits in the context on every run. Domain rules, merchant identity, invariants. Small, hand-curated, nearly static.
+- **Recall** — what it fetches **on demand** when the case calls for it. Similar past cases, prior decisions about this merchant, related disputes. Retrieved, not preloaded.
+- **Archival** — **everything else**. Full history, old runs, logs. Stored and searchable, almost never loaded. It's the source recall fishes from.
+
+```typescript
+type MemoryTier = "core" | "recall" | "archival";
+
+interface MemoryRecord {
+  tier: MemoryTier;
+  key: string;
+  content: string;
+  merchantId?: string;
+  createdAt: Date;
+  lastUsedAt?: Date;
+}
+
+// core: always enters the context
+async function loadCore(merchantId: string): Promise<MemoryRecord[]> {
+  return db.memory.find({ tier: "core", merchantId });
+}
+
+// recall: only what's relevant to the current case, top-k by similarity
+async function loadRecall(caseText: string, k = 5): Promise<MemoryRecord[]> {
+  const embedding = await embed(caseText);
+  return db.memory.search({ tier: "recall", embedding, limit: k });
+}
+```
+
+The run builds its context as `core + recall(case)`. It never dumps archival wholesale. That's what breaks the amnesia loop without inflating every inference.
+
+---
+
+## 4. Mistake #1: stuffing all of memory into the prompt
+
+The naive reaction when an agent forgets is "let's give it everything we know."
+
+```typescript
+// ❌ BROKEN: load the merchant's entire history on every run
+const history = await db.memory.find({ merchantId }); // 4,000 records
+const prompt = `Full merchant history:\n${history
+  .map((h) => h.content)
+  .join("\n")}\n\nReconcile the current case.`;
+// The window explodes, cost spikes, and the model latches onto
+// an irrelevant detail from eight months ago.
+```
+
+More memory in the prompt is not more signal. It's more noise, more cost, and more chances the model reconciles the wrong case with full confidence.
+
+```typescript
+// ✅ CORRECT: core always, recall on demand
+const core = await loadCore(merchantId);        // ~10 records, invariants
+const recall = await loadRecall(caseText, 5);   // 5 similar cases
+const context = [...core, ...recall];
+const prompt = `Rules and relevant context:\n${context
+  .map((r) => r.content)
+  .join("\n")}\n\nReconcile the current case.`;
+```
+
+Memory isn't "loaded." It's **queried**. The difference between dumping and querying is the difference between an agent that scales and one that drowns in its own past.
+
+---
+
+## 5. Mistake #2: treating the raw log as memory
+
+The second mistake is assuming that storing everything that happened **is** memory. It isn't. A log is a transcript. Memory is the conclusion.
+
+```typescript
+// ❌ BROKEN: store the raw turn as "memory"
+await db.memory.insert({
+  tier: "recall",
+  content: JSON.stringify(fullAgentTurn), // 12kb of reasoning and tool calls
+  merchantId,
+});
+// Recall ends up returning huge, irrelevant transcripts.
+```
+
+What's worth remembering isn't the process, it's the distilled learning.
+
+```typescript
+// ✅ CORRECT: write a distilled fact, not the transcript
+await db.memory.insert({
+  tier: "recall",
+  key: `settlement-lag:${merchantId}`,
+  content:
+    "Merchant 8842 (MX/SPEI) settles with a ~2 business-day lag. " +
+    "Do not flag as a discrepancy within that window.",
+  merchantId,
+  createdAt: new Date(),
+});
+```
+
+Useful memory is curated, not compressed raw. Writing the right fact, under the right key, is half the job. The other half is not writing garbage.
+
+---
+
+## 6. Writing to memory is a design decision too
+
+Everyone thinks about reads. Writes are where memory systems rot.
+
+Three rules that saved me incidents:
+
+- **Not every turn deserves a write.** Write when the agent learned something reusable, not on every run. Most reconciliations produce no new memory.
+- **Promote and demote across tiers.** A recall fact used on every run is a core candidate. One untouched for months drops to archival. `lastUsedAt` is your signal.
+- **Idempotency by key.** Writing memory under `key: "settlement-lag:8842"` should update, not duplicate. If this smells like payment idempotency keys, it's the same instinct: one truth per key, no silent duplicates.
+
+Memory without a write policy doesn't grow: it rots. It fills up with contradictory facts and recall starts returning noise with confidence.
+
+---
+
+## 7. The minimum viable pipeline
+
+Putting it together, a run of the reconciliation agent with memory looks like this:
+
+```typescript
+async function reconcile(caseText: string, merchantId: string) {
+  // 1. Load core (always) + recall (on demand)
+  const core = await loadCore(merchantId);
+  const recall = await loadRecall(caseText, 5);
+
+  // 2. Build a bounded context, never dump archival
+  const context = [...core, ...recall];
+
+  // 3. Run the agent with curated context + scoped tools
+  const result = await agent.run({ caseText, context });
+
+  // 4. Write ONLY if it learned something reusable (idempotent by key)
+  if (result.learning) {
+    await db.memory.upsert({
+      tier: "recall",
+      key: result.learning.key,
+      content: result.learning.content,
+      merchantId,
+      lastUsedAt: new Date(),
+    });
+  }
+
+  return result;
+}
+```
+
+The priority order to build it:
+
+1. **Core first.** Without stable invariants, everything else floats.
+2. **Recall with top-k.** Retrieve the similar, not the whole.
+3. **Write policy.** Distill facts, upsert by key, no raw logs.
+4. **Cross-tier promotion.** `lastUsedAt` moves things up and down.
+5. **The prompt, last.** With the four layers solved, the prompt is simple.
+
+---
+
+## 8. How you know it works
+
+Memory is measured differently from context. These are the signals I track:
+
+| Signal | What it measures | Without memory | With memory |
+|---|---|---|---|
+| Repeated questions | Does it re-ask what it knows? | High | Drops to near zero |
+| Error recurrence | Does it repeat the same bad match? | Constant | Falls after the first time |
+| Tokens per run | Cost of building the context | Grows with history | Stable (core + top-k) |
+| Success rate | Correct reconciliations | Flat | Climbs with runs |
+
+The real proof isn't a number. It's that today's run is better than yesterday's **because of what the agent remembers**, not because you retrained anything.
+
+An agent without memory repeats. One with memory composes. Composing on yesterday is exactly what a good engineer does.
+
+2026 is the year we stopped fighting the prompt and started designing memory. And I'm still learning.
