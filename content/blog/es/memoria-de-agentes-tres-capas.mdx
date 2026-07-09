@@ -1,0 +1,250 @@
+---
+title: "Memoria de agentes: las tres capas que separan un demo de un agente que aprende"
+description: "Context engineering resuelve un solo turno; la memoria resuelve la continuidad. Guía práctica del modelo de tres capas (core, recall, archival) sobre un agente real de conciliación de pagos en LATAM."
+date: "2026-07-09"
+author: "Daniel"
+tags:
+  [
+    "ai-agents",
+    "agent-memory",
+    "context-engineering",
+    "llm",
+    "payments",
+    "backend",
+  ]
+published: true
+---
+
+> Por qué el problema de 2026 ya no es el prompt ni el contexto de un solo turno, sino la memoria que persiste entre corridas. El modelo de tres capas (core, recall, archival) explicado sobre un agente real de conciliación de pagos.
+
+---
+
+Esta guía es un playbook práctico basado en uso real, no documentación oficial. Todo lo que está aquí viene de construir agentes sobre un stack de NestJS + AWS + TypeScript + PostgreSQL que mueve plata en LATAM. Si suena opinionado, es porque la producción lo volvió así.
+
+<Callout type="info">
+  **TL;DR** — El context engineering cura los tokens de **un** paso de inferencia.
+  La memoria decide qué sobrevive **entre** pasos, corridas y sesiones. Un agente
+  sin memoria repite trabajo, repite preguntas y repite errores. El patrón que
+  funciona en producción es una jerarquía de tres capas: **core** (lo que siempre
+  debe saber), **recall** (lo que trae bajo demanda) y **archival** (todo lo demás,
+  guardado y buscable pero no cargado). No es un modelo más grande. Es arquitectura
+  de estado.
+</Callout>
+
+## Tabla de contenidos
+
+1. El agente brillante con amnesia
+2. Contexto y memoria no son lo mismo
+3. Las tres capas: core, recall, archival
+4. Error #1: meter la memoria entera en el prompt
+5. Error #2: tratar el log crudo como memoria
+6. Escribir en memoria también es una decisión de diseño
+7. El pipeline mínimo viable
+8. Cómo sabes que funciona
+
+---
+
+## 1. El agente brillante con amnesia
+
+Mi agente de conciliación de pagos era bueno. Emparejaba movimientos del ledger contra settlements de bancos y procesadores, marcaba discrepancias, proponía ajustes.
+
+Y cada corrida arrancaba de cero.
+
+Volvía a "descubrir" que cierto comercio en México liquida con dos días de rezago vía SPEI. Volvía a preguntar por reglas que ya le había explicado el día anterior. Volvía a cometer el mismo error de matching sobre el mismo caso raro de PIX en Brasil.
+
+Yo tenía el context engineering afinado: recuperaba bien, comprimía el historial, acotaba las herramientas. Pero eso resuelve **un** turno.
+
+El problema no era el contexto de una inferencia. Era que nada sobrevivía a la siguiente.
+
+Era un problema de memoria.
+
+---
+
+## 2. Contexto y memoria no son lo mismo
+
+Es la confusión más cara de 2026, así que vale separarlas con precisión.
+
+| | Contexto | Memoria |
+|---|---|---|
+| Alcance | Una sola inferencia | Entre sesiones y corridas |
+| Vida útil | Efímero (se arma y se descarta) | Persistente |
+| Pregunta que responde | ¿Qué ve el modelo **ahora**? | ¿Qué debe recordar **mañana**? |
+| Falla típica | Ruido, tokens irrelevantes | Amnesia, trabajo repetido |
+| Herramienta | Retrieval, compresión, tool-scoping | Almacén + política de escritura/lectura |
+
+El context engineering te da el paso perfecto. La memoria te da la continuidad. Necesitas las dos, pero son capas distintas y se diseñan distinto.
+
+Un agente con contexto impecable y sin memoria es un genio con Alzheimer: resuelve cada caso aislado de forma brillante y no compone nunca sobre lo de ayer.
+
+---
+
+## 3. Las tres capas: core, recall, archival
+
+El patrón que se estabilizó en agentes de producción es una jerarquía de tres niveles. La idea: no todo lo que el agente "sabe" tiene que estar en el contexto, y no todo lo que guarda merece el mismo trato.
+
+- **Core** — lo que el agente **siempre** debe saber. Cabe en el contexto en cada corrida. Reglas del dominio, identidad de cada comercio, invariantes. Pequeño, curado a mano, casi estático.
+- **Recall** — lo que trae **bajo demanda** cuando el caso lo pide. Casos pasados parecidos, decisiones previas sobre este comercio, disputas relacionadas. Se recupera, no se precarga.
+- **Archival** — **todo lo demás**. Historial completo, corridas viejas, logs. Guardado y buscable, casi nunca cargado. Es la fuente desde donde recall pesca.
+
+```typescript
+type MemoryTier = "core" | "recall" | "archival";
+
+interface MemoryRecord {
+  tier: MemoryTier;
+  key: string;
+  content: string;
+  merchantId?: string;
+  createdAt: Date;
+  lastUsedAt?: Date;
+}
+
+// core: siempre entra al contexto
+async function loadCore(merchantId: string): Promise<MemoryRecord[]> {
+  return db.memory.find({ tier: "core", merchantId });
+}
+
+// recall: solo lo relevante al caso actual, top-k por similitud
+async function loadRecall(caseText: string, k = 5): Promise<MemoryRecord[]> {
+  const embedding = await embed(caseText);
+  return db.memory.search({ tier: "recall", embedding, limit: k });
+}
+```
+
+La corrida arma el contexto como `core + recall(caso)`. Nunca vuelca archival entero. Eso es lo que rompe el ciclo de la amnesia sin inflar cada inferencia.
+
+---
+
+## 4. Error #1: meter la memoria entera en el prompt
+
+La reacción ingenua cuando un agente olvida es "démosle todo lo que sabemos".
+
+```typescript
+// ❌ ROTO: cargar todo el historial del comercio en cada corrida
+const history = await db.memory.find({ merchantId }); // 4.000 registros
+const prompt = `Historial completo del comercio:\n${history
+  .map((h) => h.content)
+  .join("\n")}\n\nConcilia el caso actual.`;
+// La ventana explota, el costo se dispara y el modelo se aferra
+// al detalle irrelevante de hace ocho meses.
+```
+
+Más memoria en el prompt no es más señal. Es más ruido, más costo y más chances de que el modelo concilie el caso equivocado con total confianza.
+
+```typescript
+// ✅ CORRECTO: core siempre, recall bajo demanda
+const core = await loadCore(merchantId);        // ~10 registros, invariantes
+const recall = await loadRecall(caseText, 5);   // 5 casos parecidos
+const context = [...core, ...recall];
+const prompt = `Reglas y contexto relevante:\n${context
+  .map((r) => r.content)
+  .join("\n")}\n\nConcilia el caso actual.`;
+```
+
+La memoria no se "carga". Se **consulta**. La diferencia entre volcar y consultar es la diferencia entre un agente que escala y uno que se ahoga en su propio pasado.
+
+---
+
+## 5. Error #2: tratar el log crudo como memoria
+
+El segundo error es asumir que guardar todo lo que pasó **es** memoria. No lo es. Un log es transcripción. La memoria es la conclusión.
+
+```typescript
+// ❌ ROTO: guardar el turno crudo como "memoria"
+await db.memory.insert({
+  tier: "recall",
+  content: JSON.stringify(fullAgentTurn), // 12kb de razonamiento y tool calls
+  merchantId,
+});
+// Recall termina devolviendo transcripciones enormes e irrelevantes.
+```
+
+Lo que sirve recordar no es el proceso, es el aprendizaje destilado.
+
+```typescript
+// ✅ CORRECTO: escribir un hecho destilado, no la transcripción
+await db.memory.insert({
+  tier: "recall",
+  key: `settlement-lag:${merchantId}`,
+  content:
+    "Comercio 8842 (MX/SPEI) liquida con ~2 días hábiles de rezago. " +
+    "No marcar como discrepancia dentro de esa ventana.",
+  merchantId,
+  createdAt: new Date(),
+});
+```
+
+La memoria útil es curada, no crudo comprimido. Escribir el hecho correcto, con la clave correcta, es la mitad del trabajo. La otra mitad es no escribir basura.
+
+---
+
+## 6. Escribir en memoria también es una decisión de diseño
+
+Todo el mundo piensa en la lectura. La escritura es donde se ensucian los sistemas de memoria.
+
+Tres reglas que me ahorraron incidentes:
+
+- **No todo turno merece escritura.** Escribe cuando el agente aprendió algo reutilizable, no en cada corrida. La mayoría de las conciliaciones no producen memoria nueva.
+- **Promueve y degrada entre capas.** Un hecho de recall que se usa en cada corrida es candidato a core. Uno que no se toca en meses baja a archival. `lastUsedAt` es tu señal.
+- **Idempotencia por clave.** Escribir memoria sobre `key: "settlement-lag:8842"` debe actualizar, no duplicar. Si esto te suena a las idempotency keys de payments, es el mismo instinto: una verdad por clave, sin duplicados silenciosos.
+
+La memoria sin política de escritura no crece: se pudre. Termina llena de hechos contradictorios y recall empieza a devolver ruido con confianza.
+
+---
+
+## 7. El pipeline mínimo viable
+
+Juntando todo, una corrida del agente de conciliación con memoria se ve así:
+
+```typescript
+async function reconcile(caseText: string, merchantId: string) {
+  // 1. Cargar core (siempre) + recall (bajo demanda)
+  const core = await loadCore(merchantId);
+  const recall = await loadRecall(caseText, 5);
+
+  // 2. Armar contexto acotado, no volcar archival
+  const context = [...core, ...recall];
+
+  // 3. Correr el agente con contexto curado + herramientas acotadas
+  const result = await agent.run({ caseText, context });
+
+  // 4. Escribir SOLO si aprendió algo reutilizable (idempotente por clave)
+  if (result.learning) {
+    await db.memory.upsert({
+      tier: "recall",
+      key: result.learning.key,
+      content: result.learning.content,
+      merchantId,
+      lastUsedAt: new Date(),
+    });
+  }
+
+  return result;
+}
+```
+
+El orden de prioridad para construirlo:
+
+1. **Core primero.** Sin invariantes estables, todo lo demás flota.
+2. **Recall con top-k.** Recupera lo parecido, no lo todo.
+3. **Política de escritura.** Destila hechos, upsert por clave, no logs crudos.
+4. **Promoción entre capas.** `lastUsedAt` mueve las cosas hacia arriba y abajo.
+5. **El prompt, al final.** Con las cuatro capas resueltas, el prompt es simple.
+
+---
+
+## 8. Cómo sabes que funciona
+
+La memoria se mide distinto que el contexto. Estas son las señales que sigo:
+
+| Señal | Qué mide | Sin memoria | Con memoria |
+|---|---|---|---|
+| Preguntas repetidas | ¿Vuelve a pedir lo que ya sabe? | Alta | Cae a casi cero |
+| Reincidencia de error | ¿Repite el mismo mal matching? | Constante | Baja tras la primera vez |
+| Tokens por corrida | Costo de armar el contexto | Sube con el historial | Estable (core + top-k) |
+| Tasa de acierto | Conciliaciones correctas | Plana | Sube con las corridas |
+
+La prueba real no es un número. Es que la corrida de hoy sea mejor que la de ayer **por lo que el agente recuerda**, no por lo que reentrenaste.
+
+Un agente sin memoria repite. Uno con memoria compone. Componer sobre ayer es, exactamente, lo que hace un buen ingeniero.
+
+2026 es el año en que dejamos de pelear con el prompt y empezamos a diseñar la memoria. Y sigo aprendiendo.
