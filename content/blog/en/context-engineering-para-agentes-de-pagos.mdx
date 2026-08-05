@@ -1,0 +1,213 @@
+---
+title: "Context Engineering for Payment Agents: The Skill That Replaced the Perfect Prompt"
+description: "Why the 2026 skill isn't prompt wording but context engineering: curating the exact tokens an agent sees. A practical guide built on a real payment-reconciliation agent."
+date: "2026-07-03"
+author: "Daniel"
+tags:
+  [
+    "ai-agents",
+    "context-engineering",
+    "llm",
+    "payments",
+    "fintech",
+    "backend",
+  ]
+published: true
+---
+
+> Why the 2026 skill isn't prompt wording but context engineering: curating the exact set of tokens an agent sees at each step. A practical guide built on a real payment-reconciliation agent.
+
+---
+
+This guide is a practical playbook based on real use, not official documentation. Everything here comes from building AI agents around a NestJS + AWS + TypeScript + PostgreSQL stack that moves money across LATAM. If it sounds opinionated, it's because production made it that way.
+
+<Callout type="info">
+  **TL;DR** — The bottleneck of a reliable agent is not the model and it is
+  not your prompt wording. It's the context: the exact tokens the model sees at
+  each inference step. Curate that context deliberately (retrieve the right
+  facts, compress history, scope tools, guard the inputs) and a plain prompt
+  ships. Feed it everything and hope, and even a brilliant prompt reconciles the
+  wrong ledger with total confidence.
+</Callout>
+
+## Table of Contents
+
+1. The prompt era is closing
+2. What context engineering actually is
+3. A real problem: the reconciliation agent
+4. Error #1: dumping the whole world into the prompt
+5. Error #2: raw history instead of curated memory
+6. Scoping tools is part of the context
+7. The minimum viable context pipeline
+8. How you know it's working
+
+---
+
+## 1. The Prompt Era Is Closing
+
+For two years the craft was "prompt engineering": magic words, clever phrasing, 400-line system prompts screenshotted like trophies.
+
+That era is closing. Not because prompts stopped mattering, but because they stopped being the hard part.
+
+The model in front of you is already excellent. What decides whether your agent is reliable or a liability is **what you feed it** at each step — the documents, tool definitions, conversation history, and retrieved facts that make up the context window.
+
+That discipline has a name in 2026: **context engineering**.
+
+Prompt engineering was writing. Context engineering is architecture.
+
+---
+
+## 2. What Context Engineering Actually Is
+
+Context engineering is the deliberate construction of the token set the model consumes on each inference call. Concretely, you are always deciding:
+
+- **Which knowledge** to retrieve (and which to leave out).
+- **How much history** to keep, and in what compressed form.
+- **Which tools** the model can see and call at this step.
+- **What to preprocess** before the tokens ever reach the model.
+
+The naive mental model is "put everything relevant in the prompt so the model has full information." In practice that is exactly how agents fail: more tokens is not more signal. It's more noise, more cost, more room for the model to latch onto the wrong fact.
+
+| | Prompt engineering | Context engineering |
+|---|---|---|
+| Unit of work | Wording of one prompt | The whole token pipeline |
+| Question asked | "What do I say?" | "What does the model see?" |
+| Failure mode | Awkward output | Confidently wrong output |
+| Scales with | Cleverness | System design |
+
+---
+
+## 3. A Real Problem: The Reconciliation Agent
+
+Take a concrete case from payments. I want an agent that, given a settlement report from a payment provider, reconciles it against our internal ledger and flags mismatches.
+
+The domain has thousands of transactions, dozens of provider formats, and compliance rules that differ per country (SPEI in Mexico, PIX in Brazil). The temptation is obvious: give the model everything and let it reason.
+
+That's the naive path. Let's watch it break.
+
+---
+
+## 4. Error #1: Dumping the Whole World Into the Prompt
+
+<Tabs defaultValue="broken">
+  <TabsList>
+    <TabsTrigger value="broken">Everything in context (broken)</TabsTrigger>
+    <TabsTrigger value="correct">Retrieve what's relevant (correct)</TabsTrigger>
+  </TabsList>
+  <TabsContent value="broken">
+
+```typescript
+// ❌ BROKEN: stuff the whole ledger + every rule into the prompt
+async function reconcile(report: SettlementReport) {
+  const allTransactions = await ledger.findAll(); // 40,000 rows
+  const allRules = await rules.findAll();          // every country
+
+  const prompt = `
+    Here is our entire ledger: ${JSON.stringify(allTransactions)}
+    Here are all compliance rules: ${JSON.stringify(allRules)}
+    Reconcile this report: ${JSON.stringify(report)}
+  `;
+
+  return llm.complete(prompt); // blows the window, costs a fortune,
+                               // and mixes MX rules into a BR report
+}
+```
+
+  </TabsContent>
+  <TabsContent value="correct">
+
+```typescript
+// ✅ CORRECT: retrieve only the slice this report needs
+async function reconcile(report: SettlementReport) {
+  // Narrow by the keys the report actually references
+  const ids = report.entries.map((e) => e.transactionId);
+  const transactions = await ledger.findByIds(ids); // only what's relevant
+
+  // Scope rules to the report's country, not the whole rulebook
+  const rules = await ruleService.forCountry(report.country);
+
+  const context = buildContext({ transactions, rules, report });
+  return llm.complete(context); // small, precise, cheap, correct
+}
+```
+
+  </TabsContent>
+</Tabs>
+
+The broken version doesn't just cost more. It's *less accurate*. Loading Mexican compliance rules into a Brazilian report gives the model a plausible-looking reason to flag a valid transaction. The fix isn't a better prompt — it's retrieving the right subset.
+
+---
+
+## 5. Error #2: Raw History Instead of Curated Memory
+
+Multi-step agents accumulate conversation history. The naive approach appends every step verbatim. Twenty tool calls later, the window is full of stale tool output and the model is reasoning over noise.
+
+```typescript
+// ❌ BROKEN: append every raw step forever
+context.messages.push({ role: "tool", content: rawToolOutput });
+
+// ✅ CORRECT: compress each step into a durable fact
+const fact = summarizeToolResult(rawToolOutput);
+// e.g. "Checked 320 entries; 3 mismatches on transactionIds [a, b, c]"
+memory.remember(fact);
+context.messages = memory.relevantTo(currentStep);
+```
+
+Memory is not "keep everything." It's keeping the *right* facts in a form the model can use, and dropping the rest. A knowledge-graph or a simple keyed store both work — what matters is that you curate, not accumulate.
+
+---
+
+## 6. Scoping Tools Is Part of the Context
+
+Tool definitions live in the context window too. Every tool you expose is tokens the model reads *and* a door it can open.
+
+For a reconciliation step, the agent needs `findByIds`, `forCountry`, and `flagMismatch`. It does **not** need `refundTransaction` or `updateLedger`. Exposing them is both wasted context and a real risk.
+
+```typescript
+// ✅ CORRECT: bounded toolset per step
+const tools = [findByIds, forCountry, flagMismatch]; // read + flag only
+// refundTransaction / updateLedger are NOT in scope here
+```
+
+Bounded autonomy is context engineering. The model can't misuse a tool it never received.
+
+---
+
+## 7. The Minimum Viable Context Pipeline
+
+Strip it down and every reliable agent I've built has the same four stages between the request and the model:
+
+1. **Retrieve** — pull only the knowledge this step references (by ID, by country, by date range). Never "find all."
+2. **Compress** — turn raw tool output and history into durable, minimal facts before they re-enter the window.
+3. **Scope** — expose only the tools this step legitimately needs.
+4. **Guard** — validate and normalize inputs before they become tokens; a malformed field becomes a hallucinated conclusion.
+
+The prompt sits on top of that pipeline. It's the last 5% of the work, not the first.
+
+---
+
+## 8. How You Know It's Working
+
+You measure it. In 2026 the reliability question is answered with evaluations, not vibes:
+
+- **Success rate** on a fixed set of reconciliation cases with known answers.
+- **Context relevance** — did the tokens fed to the model actually contain the facts needed?
+- **Error propagation** — when step 3 is wrong, does step 8 collapse or recover?
+
+If accuracy drops, the first suspect is almost never the prompt. It's the context: something irrelevant got in, or something necessary got left out.
+
+---
+
+## Summary — The Priority Order
+
+If you're building an agent that touches anything real, engineer the context in this order:
+
+1. **Retrieve narrowly.** The single biggest accuracy win is not loading what you don't need.
+2. **Compress memory.** Curate facts; never append raw history forever.
+3. **Scope tools per step.** Fewer doors, fewer disasters, cleaner context.
+4. **Guard the inputs.** Garbage tokens in, confident garbage out.
+5. **Then** write the prompt.
+
+The words got easy. The system design around the model never did.
+
+And I'm still learning.
